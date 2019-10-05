@@ -5,6 +5,7 @@
 import axios from "axios"
 // eslint-disable-next-line no-unused-vars
 import moment from "moment"
+import env from "./env.js"
 import { transform } from "./stationsListBuilder.js"
 
 /** @type {NsApi} */
@@ -23,14 +24,14 @@ export class NsApi {
         this.nsApi = axios.create({
             baseURL: "https://gateway.apiportal.ns.nl/reisinformatie-api/api/v2/",
             headers: {
-                "Ocp-Apim-Subscription-Key": process.env.NS_API_KEY
+                "Ocp-Apim-Subscription-Key": env.NS_API_KEY
             }
         })
 
         this.nsTrainApi = axios.create({
             baseURL: "https://gateway.apiportal.ns.nl/virtual-train-api/api/v1/",
             headers: {
-                "Ocp-Apim-Subscription-Key": process.env.NS_API_KEY
+                "Ocp-Apim-Subscription-Key": env.NS_API_KEY
             }
         })
     }
