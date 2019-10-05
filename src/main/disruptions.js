@@ -88,7 +88,7 @@ export const getDisruptions = async(request, response) => {
 
     const disruptions = (await api.getDisruptions(request.query.actual || true, language))
         .map(it => mapDisruption(it, language))
-        .filter(it => !it && !it.id && !it.type && !it.title)
+        .filter(it => !!it && !!it.id && !!it.type && !!it.title)
         .map(it => ({
             id: it.id,
             type: it.type,
