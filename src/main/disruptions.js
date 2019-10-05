@@ -39,52 +39,44 @@ function getDisruptionType(disruption) {
  * @param {string} language
  */
 function mapDisruption(disruption, language) {
-    try {
-        const type = getDisruptionType(disruption)
-        switch (type) {
-            case DISRUPTION_TYPE.WARNING:
-                return {
-                    id: disruption.id,
-                    type: "warning",
-                    title: disruption.titel,
-                    description: disruption.melding.beschrijving
-                }
-            case DISRUPTION_TYPE.MAINTENANCE:
-                return {
-                    id: disruption.id,
-                    type: "maintenance",
-                    title: disruption.titel,
-                    description: disruption.verstoring.gevolg.split(/(geen |, |,|)extra reistijd/u)[0].trim(),
-                    additionalTravelTime: disruption.verstoring.extraReistijd,
-                    cause: language === "nl" ? "Werkzaamheden" : "Maintenance",
-                    effect: disruption.verstoring.gevolg,
-                    startDate: moment(disruption.verstoring.geldigheidsLijst[0].startDatum).format(),
-                    endDate: moment(disruption.verstoring.geldigheidsLijst[0].eindDatum).format()
-                }
-            case DISRUPTION_TYPE.DISRUPTION:
-                return {
-                    id: disruption.id,
-                    type: "disruption",
-                    title: disruption.titel,
-                    description: [
-                        disruption.verstoring.oorzaak,
-                        disruption.verstoring.gevolg,
-                        disruption.verstoring.verwachting
-                    ].filter(it => it !== null && it !== "").join(" "),
-                    cause: disruption.verstoring.oorzaak,
-                    effect: disruption.verstoring.gevolg,
-                    expectations: disruption.verstoring.verwachting,
-                    startDate: moment(disruption.verstoring.meldtijd).format()
-                }
-        }
-    } catch (error) {
-        console.log(error)
+    switch (getDisruptionType(disruption)) {
+        case DISRUPTION_TYPE.WARNING:
+            return {
+                id: disruption.id,
+                type: "warning",
+                title: disruption.titel,
+                description: disruption.melding.beschrijving
+            }
+        case DISRUPTION_TYPE.MAINTENANCE:
+            return {
+                id: disruption.id,
+                type: "maintenance",
+                title: disruption.titel,
+                description: disruption.verstoring.gevolg.split(/(geen |, |,|)extra reistijd/u)[0].trim(),
+                additionalTravelTime: disruption.verstoring.extraReistijd,
+                cause: language === "nl" ? "Werkzaamheden" : "Maintenance",
+                effect: disruption.verstoring.gevolg,
+                startDate: moment(disruption.verstoring.geldigheidsLijst[0].startDatum),
+                endDate: moment(disruption.verstoring.geldigheidsLijst[0].eindDatum)
+            }
+        case DISRUPTION_TYPE.DISRUPTION:
+            return {
+                id: disruption.id,
+                type: "disruption",
+                title: disruption.titel,
+                description: [
+                    disruption.verstoring.oorzaak,
+                    disruption.verstoring.gevolg,
+                    disruption.verstoring.verwachting
+                ].filter(it => it !== null && it !== "").join(" "),
+                cause: disruption.verstoring.oorzaak,
+                effect: disruption.verstoring.gevolg,
+                expectations: disruption.verstoring.verwachting,
+                startDate: moment(disruption.verstoring.meldtijd)
+            }
     }
 
-    return {
-        id: disruption.id,
-        title: disruption.titel
-    }
+    throw new Error()
 }
 
 /**
@@ -95,18 +87,19 @@ export const getDisruptions = async(request, response) => {
     const language = (request.headers["accept-language"] || "en").split(",")[0]
 
     const disruptions = (await api.getDisruptions(request.query.actual || true, language))
-        .map(disruption => mapDisruption(disruption, language))
-        .map(message => ({
-            id: message.id || "other",
-            type: message.type || "other",
-            title: message.title || "???",
-            description: message.description || "",
-            additionalTravelTime: message.additionalTravelTime || null,
-            cause: message.cause || null,
-            effect: message.effect || null,
-            expectations: message.expectations || null,
-            startDate: message.startDate || null,
-            endDate: message.endDate || null
+        .map(it => mapDisruption(it, language))
+        .filter(it => !it && !it.id && !it.type && !it.title)
+        .map(it => ({
+            id: it.id,
+            type: it.type,
+            title: it.title,
+            description: it.description || "",
+            additionalTravelTime: it.additionalTravelTime || null,
+            cause: it.cause || null,
+            effect: it.effect || null,
+            expectations: it.expectations || null,
+            startDate: it.startDate || null,
+            endDate: it.endDate || null
         }))
 
     response.status(200).json(disruptions)
