@@ -103,7 +103,7 @@ export class NsApi {
         else params.station = id
 
         try {
-            return (await this.nsApi.get("departures", { params })).data.payload.departures.filter((_item, index) => index < 12)
+            return (await this.nsApi.get("departures", { params })).data.payload.departures.filter((_item, index) => index < 8)
         } catch (error) {
             return []
         }
