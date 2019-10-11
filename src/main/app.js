@@ -6,6 +6,7 @@ import { Cache } from "./data-access/cache.js"
 import { OVgoStaticAPI } from "./data-access/ovgostatic-api.js"
 import { NsApi } from "./data-access/ns-api.js"
 import { transformNsDeparture } from "./transformations/departure.js"
+import { transformNsTrainInfo } from "./transformations/train-info.js"
 import { Station } from "./models/station.js"
 
 /** @type {{[key: string]: Cache<any>}} */
@@ -14,6 +15,16 @@ const caches = {
 }
 
 const nsApi = new NsApi(undefined, env.NS_API_KEY)
+
+/**
+ * @param {string} id
+ * @returns {Promise<Station>}
+ */
+const stationLookUp = async (id) => {
+    /** @type {Station[]} */
+    const stations = await caches.stations.get()
+    return stations.find(it => it.name === id || it.code === id || it.alternativeNames.includes(id))
+}
 
 const server = express()
 server.get("/api/v1/stations/:id/departures.json", getDeparturesForStation)
@@ -29,14 +40,16 @@ server.get("/api/v0/stations/:id/departures.json", async (request, response) => 
     caches[key] = caches[key] || new Cache(60, async () => {
         const departures = await nsApi.getDepartures(stationCode, language)
         const newDepartures = await Promise.all(departures.map(departure => {
-            return transformNsDeparture(departure, async (id) => {
-                /** @type {Station[]} */
-                const stations = await caches.stations.get()
-                return stations.find(it => it.name === id || it.code === id || it.alternativeNames.includes(id))
-            })
+            return transformNsDeparture(departure, stationLookUp)
         }))
         return newDepartures
     })
+    response.status(200).json(await caches[key].get())
+})
+server.get("/api/v0/journey/:id.json", async (request, response) => {
+    const journeyId = parseInt(request.params.id)
+    const key = `journey:${journeyId}`
+    caches[key] = caches[key] || new Cache(60, async () => await transformNsTrainInfo(await nsApi.getTrainInfo(journeyId), stationLookUp))
     response.status(200).json(await caches[key].get())
 })
 server.listen(env.PORT || "8080")

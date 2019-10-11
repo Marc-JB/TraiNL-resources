@@ -18,10 +18,10 @@ import moment from "moment"
  *             wheelchairAccessible: boolean
  *             bicycles: boolean
  *             bar: boolean
+ *             firstClass: boolean
  *         }
  *         image: string
  *         seats: number
- *         hasFirstClass: boolean
  *         seatsFirstClass: number
  *         destinationStationId: number
  *     }[]

@@ -107,6 +107,7 @@ export class NsApi {
      * @returns {Promise<NsTrainInfo>}
      */
     async getTrainInfo(journeyNumber, apiKey = null) {
+        console.log(`GET: train info for ${journeyNumber}`)
         const api = NsApi._getApi("virtual-train-api", apiKey || this.apiKey, 1)
         const result = await api.get(`trein/${journeyNumber}`, { params: { features: "zitplaats,platformitems,cta,drukte" } })
         if(result.status >= 400 && result.status < 600)
