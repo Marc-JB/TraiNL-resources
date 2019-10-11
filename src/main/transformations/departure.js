@@ -5,23 +5,23 @@ import moment from "moment"
 
 /**
  * @throws {Error}
- * @param {NsDeparture} departure
+ * @param {NsDeparture} it
  * @param {(id: string) => Promise<Station>} stationLookUp
  * @returns {Promise<Departure>}
  */
-export async function transformNsDeparture(departure, stationLookUp) {
-    let { operatorName, longCategoryName } = departure.product
+export async function transformNsDeparture(it, stationLookUp) {
+    let { operatorName, longCategoryName } = it.product
     if (operatorName === "R-net") {
         longCategoryName = `${operatorName} ${longCategoryName}`
         operatorName = longCategoryName === "Sprinter" ? "NS" : "Qbuzz"
     }
 
-    const plannedDepartureTime = moment(departure.plannedDateTime)
-    const actualDepartureTime = moment(departure.actualDateTime || departure.plannedDateTime)
+    const plannedDepartureTime = moment(it.plannedDateTime)
+    const actualDepartureTime = moment(it.actualDateTime || it.plannedDateTime)
 
     /** @type {"UNDERWAY" | "ARRIVED" | "DEPARTED"} */
     let departureStatus
-    switch (departure.departureStatus) {
+    switch (it.departureStatus) {
         case "INCOMING": {
             departureStatus = "UNDERWAY"
             break
@@ -38,20 +38,20 @@ export async function transformNsDeparture(departure, stationLookUp) {
     }
 
     return {
-        journeyId: parseInt(departure.product.number),
-        directionStationId: (await stationLookUp(departure.direction)).id,
+        journeyId: parseInt(it.product.number),
+        directionStationId: (await stationLookUp(it.direction)).id,
         departureTime: actualDepartureTime,
         plannedDepartureTime: plannedDepartureTime,
         delayInSeconds: actualDepartureTime.unix() - plannedDepartureTime.unix(),
-        platform: departure.actualTrack || departure.plannedTrack || "-",
-        plannedPlatform: departure.plannedTrack || "-",
-        platformChanged: (departure.actualTrack && departure.actualTrack !== departure.plannedTrack) || false,
+        platform: it.actualTrack || it.plannedTrack || "-",
+        plannedPlatform: it.plannedTrack || "-",
+        platformChanged: (it.actualTrack && it.actualTrack !== it.plannedTrack) || false,
         operator: operatorName,
         category: longCategoryName,
-        cancelled: departure.cancelled || false,
-        majorStopIds: (departure.routeStations || []).map(stop => parseInt(stop.uicCode)),
-        warnings: (departure.messages || []).filter(it => it.style === "WARNING").map(it => it.message),
-        info: (departure.messages || []).filter(it => it.style === "INFO").map(it => it.message),
+        cancelled: it.cancelled || false,
+        majorStopIds: (it.routeStations || []).map(stop => parseInt(stop.uicCode)),
+        warnings: (it.messages || []).filter(it => it.style === "WARNING").map(it => it.message),
+        info: (it.messages || []).filter(it => it.style === "INFO").map(it => it.message),
         departureStatus
     }
 }
