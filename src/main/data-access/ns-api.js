@@ -5,6 +5,8 @@
 import { NsDeparture } from "../models/ns-departure.js"
 import { NsTrainInfo } from "../models/ns-traininfo.js"
 import { NsStation } from "../models/ns-station.js"
+import { NsDisruption } from "../models/ns-disruption.js"
+import { NsMaintenance } from "../models/ns-maintenance.js"
 import axios from "axios"
 
 export class NsApi {
@@ -36,7 +38,7 @@ export class NsApi {
      * @throws {Error}
      * @param {"en" | "nl" | string} lang
      * @param {string} apiKey
-     * @returns {Promise<{ [key: string]: any }[]>}
+     * @returns {Promise<NsDisruption[]>}
      */
     async getDisruptions(lang = null, apiKey = null){
         const api = NsApi._getApi("reisinformatie-api", apiKey || this.apiKey, 2)
@@ -52,7 +54,7 @@ export class NsApi {
      * @param {boolean} actual
      * @param {"en" | "nl" | string} lang
      * @param {string} apiKey
-     * @returns {Promise<{ [key: string]: any }[]>}
+     * @returns {Promise<NsMaintenance[]>}
      */
     async getMaintenanceList(actual = true, lang = null, apiKey = null){
         const api = NsApi._getApi("reisinformatie-api", apiKey || this.apiKey, 2)
