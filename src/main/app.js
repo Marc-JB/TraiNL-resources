@@ -27,12 +27,15 @@ const stationLookUp = async (id) => {
 }
 
 const server = express()
+
 server.get("/api/v1/stations/:id/departures.json", getDeparturesForStation)
 server.get("/api/v1/stations.json", getStations)
 server.get("/api/v1/disruptions.json", getDisruptions)
+
 server.get("/api/v0/stations.json", async (_request, response) => {
     response.status(200).json(await caches.stations.get())
 })
+
 server.get("/api/v0/stations/:id/departures.json", async (request, response) => {
     const language = (request.headers["accept-language"] || "en").split(",")[0]
     const stationCode = parseInt(request.params.id)
@@ -46,10 +49,12 @@ server.get("/api/v0/stations/:id/departures.json", async (request, response) => 
     })
     response.status(200).json(await caches[key].get())
 })
+
 server.get("/api/v0/journey/:id.json", async (request, response) => {
     const journeyId = parseInt(request.params.id)
     const key = `journey:${journeyId}`
     caches[key] = caches[key] || new Cache(60, async () => await transformNsTrainInfo(await nsApi.getTrainInfo(journeyId), stationLookUp))
     response.status(200).json(await caches[key].get())
 })
+
 server.listen(env.PORT || "8080")
