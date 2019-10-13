@@ -10,11 +10,11 @@ This work is licensed under a [Creative Commons Attribution-NonCommercial-NoDeri
 
 ## To do
 * More endpoints
-* More tests
+* More unit tests
 * Add [JSON Schema](https://json-schema.org/) support
 
 ## In progress
-* Improve code architecture
+* Rewrite code to improve architecture
 
 ## Implemented
 * ES2015/6 modules
