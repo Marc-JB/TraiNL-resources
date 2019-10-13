@@ -12,6 +12,7 @@ This work is licensed under a [Creative Commons Attribution-NonCommercial-NoDeri
 * More endpoints
 * More tests
 * Improve code architecture
+* Add [JSON Schema](https://json-schema.org/) support
 
 ## Implemented
 * ES2015/6 modules
