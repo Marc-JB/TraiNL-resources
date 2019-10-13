@@ -3,6 +3,7 @@
  */
 
 /**
+ * @deprecated
  * @param {string} code
  * @param {string} language
  * @returns {{flag: string, name: string, code: string}}
@@ -49,6 +50,7 @@ export function getCountryInfo(code, language = "en") {
 }
 
 /**
+ * @deprecated
  * @param {string[]} originalSynonyms
  * @param {string} longName
  * @param {string} mediumName
@@ -89,6 +91,7 @@ function buildSynonymList(originalSynonyms, longName, mediumName) {
         .filter(it => it !== longName && !it.endsWith(" (\u0027s)") && !it.endsWith(" (\u0027t)"))
 }
 
+/** @deprecated */
 export function transform(data) {
     return {
         id: parseInt(data.UICCode),

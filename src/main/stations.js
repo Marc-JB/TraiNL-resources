@@ -10,6 +10,7 @@ import moment from "moment"
 const api = NsApi.INSTANCE
 
 /**
+ * @deprecated
  * @param {number} journeyNumber
  * @param {string} operatorName
  * @param {string} stationCode
@@ -53,6 +54,7 @@ async function getTrainComposition(journeyNumber, operatorName, stationCode, dep
 }
 
 /**
+ * @deprecated
  * @param {{ [key: string]: any }} departure
  * @param {string} stationCode
  */
@@ -94,6 +96,7 @@ async function mapDeparture(departure, stationCode) {
 }
 
 /**
+ * @deprecated
  * @param {express.Request} request
  * @param {express.Response} response
  */
@@ -109,6 +112,7 @@ export const getDeparturesForStation = async(request, response) => {
 }
 
 /**
+ * @deprecated
  * @param {express.Request} request
  * @param {express.Response} response
  */

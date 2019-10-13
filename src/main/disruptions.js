@@ -10,6 +10,7 @@ import moment from "moment"
 const api = NsApi.INSTANCE
 
 /**
+ * @deprecated
  * @enum {string}
  */
 const DISRUPTION_TYPE = {
@@ -19,6 +20,7 @@ const DISRUPTION_TYPE = {
 }
 
 /**
+ * @deprecated
  * @throws {Error} when disruption type is unknown
  * @param {{ [key: string]: any }} disruption
  * @returns {string}
@@ -35,6 +37,7 @@ function getDisruptionType(disruption) {
 }
 
 /**
+ * @deprecated
  * @param {{ [key: string]: any }} disruption
  * @param {string} language
  */
@@ -80,6 +83,7 @@ function mapDisruption(disruption, language) {
 }
 
 /**
+ * @deprecated
  * @param {express.Request} request
  * @param {express.Response} response
  */
