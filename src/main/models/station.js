@@ -1,4 +1,4 @@
-import moment from "moment"
+import { Departure } from "./departure.js"
 
 /**
  * @typedef {{
@@ -9,7 +9,8 @@ import moment from "moment"
  *     facilities: { travelAssistance: boolean, departureTimesBoard: boolean },
  *     coordinates: { latitude: number, longitude: number },
  *     alternativeNames: string[],
- *     platforms: string[]
+ *     platforms: string[],
+ *     departures?: Departure[]
  * }} Station
  */
 

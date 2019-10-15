@@ -8,6 +8,7 @@ import { NsApi } from "./data-access/ns-api.js"
 import { transformNsDeparture } from "./transformations/departure.js"
 import { transformNsTrainInfo } from "./transformations/train-info.js"
 import { Station } from "./models/station.js"
+import { Departure } from "./models/departure.js"
 
 /** @type {{[key: string]: Cache<any>}} */
 const caches = {
@@ -20,10 +21,25 @@ const nsApi = new NsApi(undefined, env.NS_API_KEY)
  * @param {string} id
  * @returns {Promise<Station>}
  */
-const stationLookUp = async (id) => {
+const stationLookUp = async (id) => (await searchStations(id, true))[0]
+
+/**
+ * @param {string} q
+ * @param {boolean} onlyExactMatches
+ * @returns {Promise<Station[]>}
+ */
+async function searchStations(q, onlyExactMatches) {
     /** @type {Station[]} */
     const stations = await caches.stations.get()
-    return stations.find(it => it.name === id || it.code === id || it.alternativeNames.includes(id))
+
+    /** @type {(it: Station) => boolean} */
+    const matchFunction = it => it.name.toLowerCase().includes(q.toLowerCase()) || it.code.toLowerCase().includes(q.toLowerCase()) || it.alternativeNames.some(it => it.toLowerCase().includes(q.toLowerCase()))
+
+    /** @type {(it: Station) => boolean} */
+    const exactMatchFunction = it => it.name === q || it.code === q || it.alternativeNames.includes(q)
+
+    return stations.filter(onlyExactMatches ? exactMatchFunction : matchFunction)
+        .sort((a, b) => exactMatchFunction(a) ? 1 : exactMatchFunction(b) ? -1 : 0).slice(0, 10)
 }
 
 const server = express()
@@ -32,8 +48,33 @@ server.get("/api/v1/stations/:id/departures.json", getDeparturesForStation)
 server.get("/api/v1/stations.json", getStations)
 server.get("/api/v1/disruptions.json", getDisruptions)
 
-server.get("/api/v0/stations.json", async (_request, response) => {
-    response.status(200).json(await caches.stations.get())
+server.get("/api/v0/stations.json", async (request, response) => {
+    let query = request.query.q
+    response.status(200).json(query ? await searchStations(query, false) : await caches.stations.get())
+})
+
+server.get("/api/v0/stations/:id.json", async (request, response) => {
+    const language = (request.headers["accept-language"] || "en").split(",")[0]
+    const stationCode = parseInt(request.params.id)
+    const key = `departures:${stationCode}:${language}`
+
+    caches[key] = caches[key] || new Cache(60, async () => {
+        const departures = await nsApi.getDepartures(stationCode, language)
+        const newDepartures = await Promise.all(departures.map(departure => {
+            return transformNsDeparture(departure, stationLookUp)
+        }))
+        return newDepartures
+    })
+
+    /** @type {Station[]} */
+    const stations = await caches.stations.get()
+
+    /** @type {Departure[]} */
+    const departures = await caches[key].get()
+
+    const station = stations.find(it => it.id == stationCode)
+    station.departures = departures
+    response.status(200).json(station)
 })
 
 server.get("/api/v0/stations/:id/departures.json", async (request, response) => {

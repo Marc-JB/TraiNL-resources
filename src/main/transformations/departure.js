@@ -40,10 +40,10 @@ export async function transformNsDeparture(it, stationLookUp) {
     return {
         journeyId: parseInt(it.product.number),
         directionStationId: (await stationLookUp(it.direction)).id,
-        departureTime: actualDepartureTime,
+        actualDepartureTime: actualDepartureTime,
         plannedDepartureTime: plannedDepartureTime,
         delayInSeconds: actualDepartureTime.unix() - plannedDepartureTime.unix(),
-        platform: it.actualTrack || it.plannedTrack || "-",
+        actualPlatform: it.actualTrack || it.plannedTrack || "-",
         plannedPlatform: it.plannedTrack || "-",
         platformChanged: (it.actualTrack && it.actualTrack !== it.plannedTrack) || false,
         operator: operatorName,

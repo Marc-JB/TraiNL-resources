@@ -5,10 +5,10 @@ import { TrainInfo } from "./traininfo.js"
  * @typedef {{
  *     journeyId: number
  *     directionStationId: number
- *     departureTime: moment.Moment
+ *     actualDepartureTime: moment.Moment
  *     plannedDepartureTime: moment.Moment
  *     delayInSeconds: number
- *     platform: string
+ *     actualPlatform: string
  *     plannedPlatform: string
  *     platformChanged: boolean
  *     operator: string
