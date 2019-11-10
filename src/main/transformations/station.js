@@ -1,9 +1,6 @@
-import { NsStation } from "../models/ns-station.js"
-import { Station } from "../models/station.js"
-
 /**
- * @param {NsStation} it
- * @returns {Station}
+ * @param {import("../models/ns-station.js").NsStation} it
+ * @returns {import("../models/station.js").Station}
  */
 export function transformNsStation(it) {
     return {

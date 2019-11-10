@@ -3,9 +3,7 @@
  */
 
 import { NsApi } from "./ns-api.js"
-import { expire } from "./expire.js"
-// eslint-disable-next-line no-unused-vars
-import express from "express"
+import { expire } from "../expire.js"
 import moment from "moment"
 
 const api = NsApi.INSTANCE
@@ -98,8 +96,8 @@ async function mapDeparture(departure, stationCode) {
 
 /**
  * @deprecated
- * @param {express.Request} request
- * @param {express.Response} response
+ * @param {import("express").Request} request
+ * @param {import("express").Response} response
  */
 export const getDeparturesForStation = async(request, response) => {
     const language = (request.headers["accept-language"] || "en").split(",")[0]
@@ -115,8 +113,8 @@ export const getDeparturesForStation = async(request, response) => {
 
 /**
  * @deprecated
- * @param {express.Request} request
- * @param {express.Response} response
+ * @param {import("express").Request} request
+ * @param {import("express").Response} response
  */
 export const getStations = async(request, response) => {
     expire(response, 60 * 60 * 24 * 5)

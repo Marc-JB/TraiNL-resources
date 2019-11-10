@@ -3,9 +3,7 @@
  */
 
 import axios from "axios"
-// eslint-disable-next-line no-unused-vars
-import moment from "moment"
-import env from "./env.js"
+import env from "../env.js"
 import { transform } from "./stationsListBuilder.js"
 
 /** @type {NsApi} */
@@ -113,7 +111,7 @@ export class NsApi {
     /**
      * @param {number} journeyNumber The journey number
      * @param {string} departureStationCode The station code of the departure station
-     * @param {moment.Moment} departureTime The time of the departure
+     * @param {import("moment").Moment} departureTime The time of the departure
      * @returns {Promise<{ [key: string]: any }>}
      */
     async getTrainInfo(journeyNumber, departureStationCode, departureTime) {

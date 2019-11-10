@@ -1,11 +1,7 @@
-import { NsTrainInfo } from "../models/ns-traininfo.js"
-import { TrainInfo } from "../models/traininfo.js"
-import { Station } from "../models/station.js"
-
 /**
- * @param {NsTrainInfo} it
- * @param {(id: string) => Promise<Station>} stationLookUp
- * @returns {Promise<TrainInfo>}
+ * @param {import("../models/ns-traininfo.js").NsTrainInfo} it
+ * @param {(id: string) => Promise<import("../models/station.js").Station>} stationLookUp
+ * @returns {Promise<import("../models/traininfo.js").TrainInfo>}
  */
 export async function transformNsTrainInfo(it, stationLookUp) {
     const isQbuzzDMG = it.vervoerder === "R-net" && it.type === "GTW"

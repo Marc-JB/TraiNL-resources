@@ -1,4 +1,4 @@
-import { getCountryInfo } from "../main/stationsListBuilder.js"
+import { getCountryInfo } from "../main/legacy/stationsListBuilder.js"
 import { describe, it } from "mocha"
 import chai from "chai"
 
