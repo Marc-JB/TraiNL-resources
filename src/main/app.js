@@ -8,16 +8,55 @@ import { NsApi } from "./data-access/ns-api.js"
 import { transformNsDeparture } from "./transformations/departure.js"
 import { transformNsTrainInfo } from "./transformations/train-info.js"
 
-/** @type {{
- *     stations: Cache<import("./models/station").Station[]>,
- *     departures: Map<number, Map<string, Cache<import("./models/departure.js").Departure[]>>>,
- *     journeys: Map<number, Cache<import("./models/traininfo").TrainInfo>>
- * }} */
-const caches = {
-    stations: new Cache(60 * 60 * 24, OVgoStaticAPI.getStations),
-    departures: new Map(),
-    journeys: new Map()
+class CacheManager {
+    constructor() {
+        /** @type {Cache<import("./models/station").Station[]>} */
+        this.stations = new Cache(60 * 60 * 24, OVgoStaticAPI.getStations)
+
+        /** @type {Map<number, Map<string, Cache<import("./models/departure.js").Departure[]>>>} */
+        this.departures = new Map()
+
+        /** @type {Map<number, Cache<import("./models/traininfo").TrainInfo>>} */
+        this.journeys = new Map()
+    }
+
+    async getStations() {
+        return await this.stations.get()
+    }
+
+    /**
+     * @param {number} stationCode
+     * @param {string} language
+     */
+    async getDepartures(stationCode, language) {
+        if(!this.departures.has(stationCode)) {
+            this.departures.set(stationCode, new Map())
+        }
+
+        if(!this.departures.get(stationCode).has(language)) {
+            this.departures.get(stationCode).set(language, new Cache(90, async () => {
+                const departures = await nsApi.getDepartures(stationCode, language)
+                const newDepartures = departures.map(departure => transformNsDeparture(departure, stationLookUp))
+                return await Promise.all(newDepartures)
+            }))
+        }
+
+        return await this.departures.get(stationCode).get(language).get()
+    }
+
+    /**
+     * @param {number} id
+     */
+    async getJourney(id){
+        if(!this.journeys.has(id)) {
+            this.journeys.set(id, new Cache(60 * 5, async () => await transformNsTrainInfo(await nsApi.getTrainInfo(id), stationLookUp)))
+        }
+
+        return await this.journeys.get(id).get()
+    }
 }
+
+const cacheManager = new CacheManager()
 
 const nsApi = new NsApi(undefined, env.NS_API_KEY)
 
@@ -33,7 +72,7 @@ const stationLookUp = async (id) => (await searchStations(id, true))[0]
  * @returns {Promise<import("./models/station").Station[]>}
  */
 async function searchStations(q, onlyExactMatches) {
-    const stations = await caches.stations.get()
+    const stations = await cacheManager.getStations()
 
     /** @type {(it: import("./models/station").Station) => boolean} */
     const matchFunction = it => it.name.toLowerCase().includes(q.toLowerCase()) || it.code.toLowerCase().includes(q.toLowerCase()) || it.alternativeNames.some(it => it.toLowerCase().includes(q.toLowerCase()))
@@ -51,35 +90,15 @@ legacy(server)
 server.get("/api/v0/stations.json", async (request, response) => {
     let query = request.query.q
     expire(response, 60 * 60 * 24 * 5)
-    response.status(200).json(query ? await searchStations(query, false) : await caches.stations.get())
+    response.status(200).json(query ? await searchStations(query, false) : await cacheManager.getStations())
 })
-
-/**
- * @param {number} stationCode
- * @param {string} language
- */
-async function departureCacheFn(stationCode, language) {
-    const departures = await nsApi.getDepartures(stationCode, language)
-    const newDepartures = departures.map(departure => transformNsDeparture(departure, stationLookUp))
-    return await Promise.all(newDepartures)
-}
 
 server.get("/api/v0/stations/:id.json", async (request, response) => {
     const language = (request.headers["accept-language"] || "en").split(",")[0]
     const stationCode = parseInt(request.params.id)
 
-    if(!caches.departures.has(stationCode)) {
-        caches.departures.set(stationCode, new Map())
-    }
-
-    if(!caches.departures.get(stationCode).has(language)) {
-        caches.departures
-            .get(stationCode)
-            .set(language, new Cache(60, () => departureCacheFn(stationCode, language)))
-    }
-
-    const stations = await caches.stations.get()
-    const departures = await caches.departures.get(stationCode).get(language).get()
+    const stations = await cacheManager.getStations()
+    const departures = await cacheManager.getDepartures(stationCode, language)
 
     const station = stations.find(it => it.id == stationCode)
     station.departures = departures
@@ -92,29 +111,14 @@ server.get("/api/v0/stations/:id/departures.json", async (request, response) => 
     const language = (request.headers["accept-language"] || "en").split(",")[0]
     const stationCode = parseInt(request.params.id)
 
-    if(!caches.departures.has(stationCode)) {
-        caches.departures.set(stationCode, new Map())
-    }
-
-    if(!caches.departures.get(stationCode).has(language)) {
-        caches.departures
-            .get(stationCode)
-            .set(language, new Cache(60, () => departureCacheFn(stationCode, language)))
-    }
-
     expire(response, 90)
-    response.status(200).json(await caches.departures.get(stationCode).get(language).get())
+    response.status(200).json(await cacheManager.getDepartures(stationCode, language))
 })
 
 server.get("/api/v0/journey/:id.json", async (request, response) => {
     const journeyId = parseInt(request.params.id)
-
-    if(!caches.journeys.has(journeyId)) {
-        caches.journeys.set(journeyId, new Cache(60, async () => await transformNsTrainInfo(await nsApi.getTrainInfo(journeyId), stationLookUp)))
-    }
-
     expire(response, 60 * 5)
-    response.status(200).json(await caches.journeys.get(journeyId).get())
+    response.status(200).json(await cacheManager.getJourney(journeyId))
 })
 
 server.listen(env.PORT || "8080")
