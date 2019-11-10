@@ -1,8 +1,7 @@
 import moment from "moment"
-import express from "express"
 
 /**
- * @param {express.Response} response
+ * @param {import("express").Response} response
  * @param {number} expirationInSeconds
  */
 export function expire(response, expirationInSeconds) {

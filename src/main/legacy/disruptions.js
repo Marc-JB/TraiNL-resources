@@ -3,10 +3,8 @@
  */
 
 import { NsApi } from "./ns-api.js"
-// eslint-disable-next-line no-unused-vars
-import express from "express"
 import moment from "moment"
-import { expire } from "./expire.js"
+import { expire } from "../expire.js"
 
 const api = NsApi.INSTANCE
 
@@ -85,8 +83,8 @@ function mapDisruption(disruption, language) {
 
 /**
  * @deprecated
- * @param {express.Request} request
- * @param {express.Response} response
+ * @param {import("express").Request} request
+ * @param {import("express").Response} response
  */
 export const getDisruptions = async(request, response) => {
     const language = (request.headers["accept-language"] || "en").split(",")[0]

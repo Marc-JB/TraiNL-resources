@@ -1,13 +1,10 @@
-import { NsDeparture } from "../models/ns-departure.js"
-import { Departure } from "../models/departure.js"
-import { Station } from "../models/station.js"
 import moment from "moment"
 
 /**
  * @throws {Error}
- * @param {NsDeparture} it
- * @param {(id: string) => Promise<Station>} stationLookUp
- * @returns {Promise<Departure>}
+ * @param {import("../models/ns-departure.js").NsDeparture} it
+ * @param {(id: string) => Promise<import("../models/station.js").Station>} stationLookUp
+ * @returns {Promise<import("../models/departure.js").Departure>}
  */
 export async function transformNsDeparture(it, stationLookUp) {
     let { operatorName, longCategoryName } = it.product
