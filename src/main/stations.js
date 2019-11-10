@@ -3,6 +3,7 @@
  */
 
 import { NsApi } from "./ns-api.js"
+import { expire } from "./expire.js"
 // eslint-disable-next-line no-unused-vars
 import express from "express"
 import moment from "moment"
@@ -108,6 +109,7 @@ export const getDeparturesForStation = async(request, response) => {
     const departures = (await api.getDepartures(stationCode, language))
         .map(departure => mapDeparture(departure, stationCode))
 
+    expire(response, 90)
     response.status(200).json(await Promise.all(departures))
 }
 
@@ -117,5 +119,6 @@ export const getDeparturesForStation = async(request, response) => {
  * @param {express.Response} response
  */
 export const getStations = async(request, response) => {
+    expire(response, 60 * 60 * 24 * 5)
     response.status(200).json(await api.getAllStations(/*request.query.getFromNs === "true"*/))
 }

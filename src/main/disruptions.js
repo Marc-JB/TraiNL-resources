@@ -6,6 +6,7 @@ import { NsApi } from "./ns-api.js"
 // eslint-disable-next-line no-unused-vars
 import express from "express"
 import moment from "moment"
+import { expire } from "./expire.js"
 
 const api = NsApi.INSTANCE
 
@@ -106,5 +107,6 @@ export const getDisruptions = async(request, response) => {
             endDate: it.endDate || null
         }))
 
+    expire(response, 60 * 2)
     response.status(200).json(disruptions)
 }

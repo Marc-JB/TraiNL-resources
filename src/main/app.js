@@ -1,5 +1,6 @@
 import env from "./env.js"
 import express from "express"
+import { expire } from "./expire.js"
 import { getDisruptions } from "./disruptions.js"
 import { getDeparturesForStation, getStations } from "./stations.js"
 import { Cache } from "./data-access/cache.js"
@@ -50,6 +51,7 @@ server.get("/api/v1/disruptions.json", getDisruptions)
 
 server.get("/api/v0/stations.json", async (request, response) => {
     let query = request.query.q
+    expire(response, 60 * 60 * 24 * 5)
     response.status(200).json(query ? await searchStations(query, false) : await caches.stations.get())
 })
 
@@ -74,6 +76,8 @@ server.get("/api/v0/stations/:id.json", async (request, response) => {
 
     const station = stations.find(it => it.id == stationCode)
     station.departures = departures
+
+    expire(response, 90)
     response.status(200).json(station)
 })
 
@@ -88,6 +92,8 @@ server.get("/api/v0/stations/:id/departures.json", async (request, response) => 
         }))
         return newDepartures
     })
+
+    expire(response, 90)
     response.status(200).json(await caches[key].get())
 })
 
@@ -95,6 +101,8 @@ server.get("/api/v0/journey/:id.json", async (request, response) => {
     const journeyId = parseInt(request.params.id)
     const key = `journey:${journeyId}`
     caches[key] = caches[key] || new Cache(60, async () => await transformNsTrainInfo(await nsApi.getTrainInfo(journeyId), stationLookUp))
+
+    expire(response, 60 * 5)
     response.status(200).json(await caches[key].get())
 })
 
