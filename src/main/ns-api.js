@@ -11,6 +11,7 @@ import { transform } from "./stationsListBuilder.js"
 /** @type {NsApi} */
 let INSTANCE = null
 
+/** @deprecated */
 export class NsApi {
 
     /**

@@ -2239,7 +2239,7 @@
     {
         "id": 8400055,
         "code": "AMF",
-        "name": "Amersfoort",
+        "name": "Amersfoort Centraal",
         "country": {
             "flag": "🇳🇱",
             "name": "The Netherlands",
@@ -2253,7 +2253,10 @@
             "latitude": 52.1539,
             "longitude": 5.3706
         },
-        "alternativeNames": [],
+        "alternativeNames": [
+            "Amersfoort CS",
+            "Amersfoort"
+        ],
         "platforms": [
             "1",
             "2",
@@ -3856,7 +3859,7 @@
     {
         "id": 8400166,
         "code": "DTZ",
-        "name": "Delft Zuid",
+        "name": "Delft Campus",
         "country": {
             "flag": "🇳🇱",
             "name": "The Netherlands",
@@ -3870,7 +3873,9 @@
             "latitude": 51.9908,
             "longitude": 4.3647
         },
-        "alternativeNames": [],
+        "alternativeNames": [
+            "Delft Zuid"
+        ],
         "platforms": [
             "1",
             "2"
@@ -4579,7 +4584,7 @@
     {
         "id": 8400206,
         "code": "EHV",
-        "name": "Eindhoven",
+        "name": "Eindhoven Centraal",
         "country": {
             "flag": "🇳🇱",
             "name": "The Netherlands",
@@ -4593,7 +4598,10 @@
             "latitude": 51.4433,
             "longitude": 5.4814
         },
-        "alternativeNames": [],
+        "alternativeNames": [
+            "Eindhoven CS",
+            "Eindhoven"
+        ],
         "platforms": [
             "1",
             "1a",
@@ -12767,7 +12775,7 @@
     {
         "id": 8841525,
         "code": "LUIKP",
-        "name": "Liège-Palais",
+        "name": "Liège-Saint-Lambert",
         "country": {
             "flag": "🇧🇪",
             "name": "Belgium",
@@ -12781,13 +12789,15 @@
             "latitude": 50.6465,
             "longitude": 5.5707
         },
-        "alternativeNames": [],
+        "alternativeNames": [
+            "Liège-Palais"
+        ],
         "platforms": []
     },
     {
         "id": 8841558,
         "code": "LUIKJ",
-        "name": "Liège-Jonfosse",
+        "name": "Liège-Carré",
         "country": {
             "flag": "🇧🇪",
             "name": "Belgium",
@@ -12801,7 +12811,9 @@
             "latitude": 50.6405,
             "longitude": 5.562
         },
-        "alternativeNames": [],
+        "alternativeNames": [
+            "Liège-Jonfosse"
+        ],
         "platforms": []
     },
     {

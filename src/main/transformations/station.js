@@ -1,9 +1,30 @@
-/**
- * @fileoverview Code used to build OVgo's station list from the list provided by the NS.
- */
+import { NsStation } from "../models/ns-station.js"
+import { Station } from "../models/station.js"
 
 /**
- * @deprecated
+ * @param {NsStation} it
+ * @returns {Station}
+ */
+export function transformNsStation(it) {
+    return {
+        id: parseInt(it.UICCode),
+        code: it.code,
+        name: it.namen.lang,
+        country: getCountryInfo(it.land, "en"),
+        facilities: {
+            travelAssistance: it.heeftReisassistentie,
+            departureTimesBoard: it.heeftVertrektijden
+        },
+        coordinates: {
+            latitude: Math.round(it.lat * 10000) / 10000,
+            longitude: Math.round(it.lng * 10000) / 10000
+        },
+        alternativeNames: buildSynonymList(it.synoniemen, it.namen.lang, it.namen.middel),
+        platforms: it.sporen.map(it => it.spoorNummer)
+    }
+}
+
+/**
  * @param {string} code
  * @param {string} language
  * @returns {{flag: string, name: string, code: string}}
@@ -50,7 +71,6 @@ export function getCountryInfo(code, language = "en") {
 }
 
 /**
- * @deprecated
  * @param {string[]} originalSynonyms
  * @param {string} longName
  * @param {string} mediumName
@@ -89,24 +109,4 @@ function buildSynonymList(originalSynonyms, longName, mediumName) {
         .map(it => it.original)
         // Remove the longName and duplicates ending with ('s) or ('t)
         .filter(it => it !== longName && !it.endsWith(" (\u0027s)") && !it.endsWith(" (\u0027t)"))
-}
-
-/** @deprecated */
-export function transform(data) {
-    return {
-        id: parseInt(data.UICCode),
-        code: data.code,
-        name: data.namen.lang,
-        country: getCountryInfo(data.land, "en"),
-        facilities: {
-            travelAssistance: data.heeftReisassistentie,
-            departureTimesBoard: data.heeftVertrektijden
-        },
-        coordinates: {
-            latitude: Math.round(data.lat * 10000) / 10000,
-            longitude: Math.round(data.lng * 10000) / 10000
-        },
-        alternativeNames: buildSynonymList(data.synoniemen, data.namen.lang, data.namen.middel),
-        platforms: data.sporen.map(it => it.spoorNummer)
-    }
 }

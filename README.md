@@ -10,9 +10,13 @@ This work is licensed under a [Creative Commons Attribution-NonCommercial-NoDeri
 
 ## To do
 * More endpoints
-* More tests
-* Improve code architecture
+* More unit tests
+* Add [JSON Schema](https://json-schema.org/) support
+
+## In progress
+* Rewrite code to improve architecture
 
 ## Implemented
 * ES2015/6 modules
 * Types using JSDoc
+* ESLint
