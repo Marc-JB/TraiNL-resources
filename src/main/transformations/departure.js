@@ -4,14 +4,16 @@ import moment from "moment"
  * @throws {Error}
  * @param {import("../models/ns-departure.js").NsDeparture} it
  * @param {(id: string) => Promise<import("../models/station.js").Station>} stationLookUp
+ * @param {"en" | "nl"} [language]
  * @returns {Promise<import("../models/departure.js").Departure>}
  */
-export async function transformNsDeparture(it, stationLookUp) {
+export async function transformNsDeparture(it, stationLookUp, language = "en") {
     let { operatorName, longCategoryName } = it.product
+
     if (operatorName.toLowerCase() === "r-net" && longCategoryName.toLowerCase() === "sprinter") {
-        operatorName = "R-net door NS"
+        operatorName = `R-net ${language === "en" ? "by" : "door"} Qbuzz`
     } else if (operatorName.toLowerCase() === "r-net" && longCategoryName.toLowerCase() === "stoptrein") {
-        operatorName = "R-net door Qbuzz"
+        operatorName = `R-net ${language === "en" ? "by" : "door"} NS`
     }
 
     const plannedDepartureTime = moment(it.plannedDateTime)

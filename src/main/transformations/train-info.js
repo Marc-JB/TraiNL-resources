@@ -1,25 +1,37 @@
 /**
  * @param {import("../models/ns-traininfo.js").NsTrainInfo} it
  * @param {(id: string) => Promise<import("../models/station.js").Station>} stationLookUp
+ * @param {"en" | "nl"} [language]
  * @returns {Promise<import("../models/traininfo.js").TrainInfo>}
  */
-export async function transformNsTrainInfo(it, stationLookUp) {
+export async function transformNsTrainInfo(it, stationLookUp, language = "en") {
     const isQbuzzDMG = it.vervoerder === "R-net" && it.type === "GTW"
-    const isEurostar = it.type === "EUROSTAR"
-    const isThalys = it.type === "TVG"
-    const isICE = it.type === "ICE"
+    const isEurostar = it.type.toLowerCase() === "eurostar"
+
+    let operator = it.vervoerder
+    if(isEurostar) {
+        operator = `Eurostar/NS Internation${language === "en" ? "a" : "aa"}l`
+    } else if(it.type.toLowerCase() === "tvg") {
+        operator = `Thalys/NS Internation${language === "en" ? "a" : "aa"}l`
+    } else if(it.type.toLowerCase() === "ice") {
+        operator = `DB/NS Internation${language === "en" ? "a" : "aa"}l`
+    } else if (isQbuzzDMG) {
+        operator = `R-net ${language === "en" ? "by" : "door"} Qbuzz`
+    } else if (it.vervoerder.toLowerCase() === "r-net" && !isQbuzzDMG) {
+        operator = `R-net ${language === "en" ? "by" : "door"} NS`
+    }
 
     return {
         journeyId: it.ritnummer,
         stationId: (await stationLookUp(it.station)).id,
         type: it.type,
-        operator: isEurostar ? "Eurostar" : isThalys ? "Thalys" : isICE ? "NS International" : it.vervoerder === "R-net" ? (it.type === "GTW" ? "Qbuzz" : "NS") : it.vervoerder,
+        operator,
         platform: it.spoor,
         parts: await Promise.all(it.materieeldelen.map(async part => {
             let imageUrl = part.afbeelding
             let type = part.type
 
-            if (!!imageUrl && type === "EUROSTAR") {
+            if (isEurostar && !!imageUrl) {
                 imageUrl = "https://marc-jb.github.io/OVgo-api/eurostar_e320.png"
                 type = "Eurostar e320/Class 374"
             }

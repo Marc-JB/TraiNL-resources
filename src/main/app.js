@@ -25,7 +25,7 @@ class CacheManager {
 
     /**
      * @param {number} stationCode
-     * @param {string} language
+     * @param {"en" | "nl"} language
      */
     async getDepartures(stationCode, language) {
         if(!this.departures.has(stationCode)) {
@@ -35,7 +35,7 @@ class CacheManager {
         if(!this.departures.get(stationCode).has(language)) {
             this.departures.get(stationCode).set(language, new Cache(90, async () => {
                 const departures = await nsApi.getDepartures(stationCode, language)
-                const newDepartures = departures.map(departure => transformNsDeparture(departure, stationLookUp))
+                const newDepartures = departures.map(departure => transformNsDeparture(departure, stationLookUp, language))
                 return await Promise.all(newDepartures)
             }))
         }
@@ -110,6 +110,7 @@ server.get("/api/v0/stations/:id/departures.json", async (request, response) => 
     const language = (request.headers["accept-language"] || "en").split(",")[0]
     const stationCode = parseInt(request.params.id)
 
+    // @ts-ignore
     const departures = await cacheManager.getDepartures(stationCode, language)
 
     expire(response, 90)
