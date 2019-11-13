@@ -81,7 +81,12 @@ async function searchStations(q, onlyExactMatches) {
     const exactMatchFunction = it => it.name === q || it.code === q || it.alternativeNames.includes(q)
 
     return stations.filter(onlyExactMatches ? exactMatchFunction : matchFunction)
-        .sort((a, b) => exactMatchFunction(a) ? 1 : exactMatchFunction(b) ? -1 : 0).slice(0, 10)
+        .sort((a, b) =>
+            exactMatchFunction(a) && !exactMatchFunction(b) ? 1 :
+                exactMatchFunction(b) && !exactMatchFunction(a) ? -1 :
+                    a.name.toLowerCase().startsWith(q.toLowerCase()) && !b.name.toLowerCase().startsWith(q.toLowerCase()) ? 1 :
+                        b.name.toLowerCase().startsWith(q.toLowerCase()) && !a.name.toLowerCase().startsWith(q.toLowerCase()) ? -1 : 0
+        ).slice(0, 10)
 }
 
 const server = express()
@@ -98,10 +103,11 @@ server.get("/api/v0/stations/:id.json", async (request, response) => {
     const stationCode = parseInt(request.params.id)
 
     const stations = await cacheManager.getStations()
-    const departures = await cacheManager.getDepartures(stationCode, language)
-
     const station = stations.find(it => it.id == stationCode)
-    station.departures = departures
+
+    if(request.query["withDepartures"] === "true") {
+        station.departures = await cacheManager.getDepartures(stationCode, language)
+    }
 
     expire(response, 90)
     response.status(200).json(station)
