@@ -121,7 +121,7 @@ server.get("/api/v0/stations/:id/departures.json", async (request, response) => 
     response.status(200).json(await cacheManager.getDepartures(stationCode, language))
 })
 
-server.get("/api/v0/journey/:id.json", async (request, response) => {
+server.get("/api/v0/journeys/:id.json", async (request, response) => {
     const journeyId = parseInt(request.params.id)
     expire(response, 60 * 5)
     response.status(200).json(await cacheManager.getJourney(journeyId))
