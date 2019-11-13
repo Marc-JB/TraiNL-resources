@@ -1,6 +1,5 @@
 import env from "./env.js"
 import express from "express"
-import legacy from "./legacy/app.js"
 import { expire } from "./expire.js"
 import { Cache } from "./data-access/cache.js"
 import { OVgoStaticAPI } from "./data-access/ovgostatic-api.js"
@@ -90,7 +89,6 @@ async function searchStations(q, onlyExactMatches) {
 }
 
 const server = express()
-legacy(server)
 
 server.get("/api/v0/stations.json", async (request, response) => {
     let query = request.query.q
