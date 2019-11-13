@@ -8,9 +8,10 @@ import moment from "moment"
  */
 export async function transformNsDeparture(it, stationLookUp) {
     let { operatorName, longCategoryName } = it.product
-    if (operatorName.toLowerCase() === "r-net" && ["sprinter", "stoptrein"].includes(longCategoryName.toLowerCase())) {
-        longCategoryName = `${operatorName} ${longCategoryName}`
-        operatorName = longCategoryName.toLowerCase() === "sprinter" ? "NS" : "Qbuzz"
+    if (operatorName.toLowerCase() === "r-net" && longCategoryName.toLowerCase() === "sprinter") {
+        operatorName = "R-net door NS"
+    } else if (operatorName.toLowerCase() === "r-net" && longCategoryName.toLowerCase() === "stoptrein") {
+        operatorName = "R-net door Qbuzz"
     }
 
     const plannedDepartureTime = moment(it.plannedDateTime)
