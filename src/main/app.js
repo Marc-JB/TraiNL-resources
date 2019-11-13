@@ -82,10 +82,10 @@ async function searchStations(q, onlyExactMatches) {
 
     return stations.filter(onlyExactMatches ? exactMatchFunction : matchFunction)
         .sort((a, b) =>
-            exactMatchFunction(a) && !exactMatchFunction(b) ? 1 :
-                exactMatchFunction(b) && !exactMatchFunction(a) ? -1 :
-                    a.name.toLowerCase().startsWith(q.toLowerCase()) && !b.name.toLowerCase().startsWith(q.toLowerCase()) ? 1 :
-                        b.name.toLowerCase().startsWith(q.toLowerCase()) && !a.name.toLowerCase().startsWith(q.toLowerCase()) ? -1 : 0
+            exactMatchFunction(a) && !exactMatchFunction(b) ? -1 :
+                exactMatchFunction(b) && !exactMatchFunction(a) ? 1 :
+                    a.name.toLowerCase().startsWith(q.toLowerCase()) && !b.name.toLowerCase().startsWith(q.toLowerCase()) ? -1 :
+                        b.name.toLowerCase().startsWith(q.toLowerCase()) && !a.name.toLowerCase().startsWith(q.toLowerCase()) ? 1 : 0
         ).slice(0, 10)
 }
 
@@ -121,7 +121,7 @@ server.get("/api/v0/stations/:id/departures.json", async (request, response) => 
     response.status(200).json(await cacheManager.getDepartures(stationCode, language))
 })
 
-server.get("/api/v0/journey/:id.json", async (request, response) => {
+server.get("/api/v0/journeys/:id.json", async (request, response) => {
     const journeyId = parseInt(request.params.id)
     expire(response, 60 * 5)
     response.status(200).json(await cacheManager.getJourney(journeyId))
