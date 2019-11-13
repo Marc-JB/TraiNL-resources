@@ -107,6 +107,16 @@ server.get("/api/v0/stations/:id.json", async (request, response) => {
 
     if(request.query["withDepartures"] === "true") {
         station.departures = await cacheManager.getDepartures(stationCode, language)
+
+        if(request.query["withTainComposition"] === "true") {
+            await Promise.all(station.departures.slice(0, 7).map(async it => {
+                if(!it.trainComposition) {
+                    // eslint-disable-next-line require-atomic-updates
+                    it.trainComposition = await cacheManager.getJourney(it.journeyId)
+                }
+                return it
+            }))
+        }
     }
 
     expire(response, 90)
@@ -117,8 +127,20 @@ server.get("/api/v0/stations/:id/departures.json", async (request, response) => 
     const language = (request.headers["accept-language"] || "en").split(",")[0]
     const stationCode = parseInt(request.params.id)
 
+    const departures = await cacheManager.getDepartures(stationCode, language)
+
+    if(request.query["withTainComposition"] === "true") {
+        await Promise.all(departures.slice(0, 7).map(async it => {
+            if(!it.trainComposition) {
+                // eslint-disable-next-line require-atomic-updates
+                it.trainComposition = await cacheManager.getJourney(it.journeyId)
+            }
+            return it
+        }))
+    }
+
     expire(response, 90)
-    response.status(200).json(await cacheManager.getDepartures(stationCode, language))
+    response.status(200).json(departures)
 })
 
 server.get("/api/v0/journeys/:id.json", async (request, response) => {
