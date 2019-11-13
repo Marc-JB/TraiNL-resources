@@ -25,7 +25,7 @@ export async function transformNsTrainInfo(it, stationLookUp) {
             }
 
             if (isQbuzzDMG && imageUrl.includes("arriva")) {
-                imageUrl = `https://marc-jb.github.io/OVgo-api/gtw_e_${imageUrl.includes("6") ? "6" : "8"}_qbuzz.png`
+                imageUrl = `https://marc-jb.github.io/OVgo-api/gtw_e_${imageUrl.includes("6") ? "6" : "8"}_qbuzz${imageUrl.includes("6") ? "_v2" : ""}.png`
             }
             if (isQbuzzDMG && type.includes("Arriva")) {
                 type = type.replace("Arriva", "Qbuzz")

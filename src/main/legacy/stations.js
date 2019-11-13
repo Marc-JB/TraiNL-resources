@@ -32,7 +32,7 @@ async function getTrainComposition(journeyNumber, operatorName, stationCode, dep
             }
 
             if (operatorName === "Qbuzz" && imageUrl !== null && imageUrl.includes("arriva")) {
-                imageUrl = `https://marc-jb.github.io/OVgo-api/gtw_e_${imageUrl.includes("6") ? "6" : "8"}_qbuzz.png`
+                imageUrl = `https://marc-jb.github.io/OVgo-api/gtw_e_${imageUrl.includes("6") ? "6" : "8"}_qbuzz${imageUrl.includes("6") ? "_v2" : ""}.png`
             }
             if (operatorName === "Qbuzz" && type !== null && type.includes("Arriva")) {
                 type = type.replace("Arriva", "Qbuzz")
