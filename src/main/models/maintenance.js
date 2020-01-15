@@ -2,12 +2,18 @@ import moment from "moment"
 
 /**
  * @typedef {{
- *     id: string
- *     type: "werkzaamheid"
- *     titel: string
+ *     titel: string,
+ *     startDate: import("moment").Moment,
+ *     endDate: import("moment").Moment,
+ *     trajects: {
+ *         stations: number[],
+ *         startDate: import("moment").Moment,
+ *         endDate: import("moment").Moment,
+ *         bothDirections: boolean
+ *     }[],
+ *     travelAdviceShort: string,
+ *     travelAdviceDetailed: string,
  *     verstoring?: {
- *         type: "WERKZAAMHEID"
- *         id: string
  *         extraReistijd: string
  *         reisadviezen: { titel: string, reisadvies: { advies: string[] }[] }[]
  *         geldigheidsLijst: { startDatum: string, eindDatum: string }[]
@@ -21,8 +27,8 @@ import moment from "moment"
  *         trajecten: { stations: string[], begintijd: string, eindtijd: string, richting: "HEEN" | "HEEN_EN_TERUG" }[]
  *         prioriteit: number
  *     }
- * }} NsMaintenance
+ * }} Maintenance
  */
 
-/** @type {NsMaintenance | undefined} */
-export const NsMaintenance = undefined
+/** @type {Maintenance | undefined} */
+export const Maintenance = undefined

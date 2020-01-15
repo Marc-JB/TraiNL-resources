@@ -11,29 +11,23 @@ let INSTANCE = null
 
 /** @deprecated */
 export class NsApi {
+    #ovGoStaticApi = axios.create({
+        baseURL: "https://Marc-JB.github.io/OVgo-api/"
+    })
 
-    /**
-     * @protected
-     */
-    constructor() {
-        this.ovGoStaticApi = axios.create({
-            baseURL: "https://Marc-JB.github.io/OVgo-api/"
-        })
+    #nsApi = axios.create({
+        baseURL: "https://gateway.apiportal.ns.nl/reisinformatie-api/api/v2/",
+        headers: {
+            "Ocp-Apim-Subscription-Key": env.NS_API_KEY
+        }
+    })
 
-        this.nsApi = axios.create({
-            baseURL: "https://gateway.apiportal.ns.nl/reisinformatie-api/api/v2/",
-            headers: {
-                "Ocp-Apim-Subscription-Key": env.NS_API_KEY
-            }
-        })
-
-        this.nsTrainApi = axios.create({
-            baseURL: "https://gateway.apiportal.ns.nl/virtual-train-api/api/v1/",
-            headers: {
-                "Ocp-Apim-Subscription-Key": env.NS_API_KEY
-            }
-        })
-    }
+    #nsTrainApi = axios.create({
+        baseURL: "https://gateway.apiportal.ns.nl/virtual-train-api/api/v1/",
+        headers: {
+            "Ocp-Apim-Subscription-Key": env.NS_API_KEY
+        }
+    })
 
     /**
      * @returns {NsApi} the singleton instance for this class.
@@ -60,13 +54,13 @@ export class NsApi {
      */
     async getAllStations(getFromNs = false) {
         if(getFromNs){
-            const { data } = await this.nsApi.get("stations")
+            const { data } = await this.#nsApi.get("stations")
             return data.payload.map(transform)
         }
 
         if (!this.stationsCache) {
             try {
-                this.stationsCache = (await this.ovGoStaticApi.get("stations.json")).data
+                this.stationsCache = (await this.#ovGoStaticApi.get("stations.json")).data
             } catch (error) {
                 return []
             }
@@ -82,7 +76,7 @@ export class NsApi {
      */
     async getDisruptions(actual = true, lang) {
         try {
-            return (await this.nsApi.get("disruptions", { params: { actual, lang } })).data.payload
+            return (await this.#nsApi.get("disruptions", { params: { actual, lang } })).data.payload
         } catch (error) {
             return []
         }
@@ -102,7 +96,7 @@ export class NsApi {
         else params.station = id
 
         try {
-            return (await this.nsApi.get("departures", { params })).data.payload.departures.filter((_item, index) => index < 8)
+            return (await this.#nsApi.get("departures", { params })).data.payload.departures.filter((_item, index) => index < 8)
         } catch (error) {
             return []
         }
@@ -116,7 +110,7 @@ export class NsApi {
      */
     async getTrainInfo(journeyNumber, departureStationCode, departureTime) {
         try {
-            return (await this.nsTrainApi.get(`trein/${journeyNumber}/${departureStationCode}`, {
+            return (await this.#nsTrainApi.get(`trein/${journeyNumber}/${departureStationCode}`, {
                 params: {
                     dateTime: departureTime.format("YYYY-MM-DDTHH:mm")
                 }

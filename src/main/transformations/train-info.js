@@ -1,38 +1,50 @@
 /**
  * @param {import("../models/ns-traininfo.js").NsTrainInfo} it
  * @param {(id: string) => Promise<import("../models/station.js").Station>} stationLookUp
+ * @param {"en" | "nl"} [language]
  * @returns {Promise<import("../models/traininfo.js").TrainInfo>}
  */
-export async function transformNsTrainInfo(it, stationLookUp) {
-    const isQbuzzDMG = it.vervoerder === "R-net" && it.type === "GTW"
-    const isEurostar = it.type === "EUROSTAR"
-    const isThalys = it.type === "TVG"
-    const isICE = it.type === "ICE"
+export async function transformNsTrainInfo(it, stationLookUp, language = "en") {
+    const type = it.type ? it.type.toLowerCase() : ""
+    const isQbuzzDMG = it.vervoerder === "R-net" && type !== "flirt"
+    const isEurostar = type === "eurostar"
+
+    if(it.materieeldelen && it.materieeldelen.some(it => it.type === "Flirt 2 TAG")) {
+        it.vervoerder = `R-net ${language === "en" ? "by" : "door"} NS`
+    } else if (it.vervoerder === "R-net" && type !== "flirt") {
+        it.vervoerder = `R-net ${language === "en" ? "by" : "door"} Qbuzz`
+    }
+
+    if(isEurostar) {
+        it.vervoerder = `Eurostar/NS Internation${language === "en" ? "a" : "aa"}l`
+    } else if(type === "tvg") {
+        it.vervoerder = `Thalys/NS Internation${language === "en" ? "a" : "aa"}l`
+    } else if(type === "ice") {
+        it.vervoerder = `DB/NS Internation${language === "en" ? "a" : "aa"}l`
+    }
 
     return {
         journeyId: it.ritnummer,
         stationId: (await stationLookUp(it.station)).id,
         type: it.type,
-        operator: isEurostar ? "Eurostar" : isThalys ? "Thalys" : isICE ? "NS International" : it.vervoerder === "R-net" ? (it.type === "GTW" ? "Qbuzz" : "NS") : it.vervoerder,
+        operator: it.vervoerder,
         platform: it.spoor,
         parts: await Promise.all(it.materieeldelen.map(async part => {
             let imageUrl = part.afbeelding
             let type = part.type
 
-            if (!!imageUrl && type === "EUROSTAR") {
+            if (isEurostar && !!imageUrl) {
                 imageUrl = "https://marc-jb.github.io/OVgo-api/eurostar_e320.png"
                 type = "Eurostar e320/Class 374"
             }
 
-            if (isQbuzzDMG && imageUrl.includes("arriva")) {
-                imageUrl = `https://marc-jb.github.io/OVgo-api/gtw_e_${imageUrl.includes("6") ? "6" : "8"}_qbuzz${imageUrl.includes("6") ? "_v2" : ""}.png`
-            }
-            if (isQbuzzDMG && type.includes("Arriva")) {
-                type = type.replace("Arriva", "Qbuzz")
+            if (isQbuzzDMG) {
+                type = "Qbuzz GTW"
+                imageUrl = imageUrl && imageUrl.includes("8") ?  "https://marc-jb.github.io/OVgo-api/gtw_qbuzz_28.png" : "https://treinposities.nl/matimg/gtw_qbuzz_26.png"
             }
 
-            const totalSeatsFirstClass = isQbuzzDMG || !part.zitplaatsen ? 0 : part.zitplaatsen.zitplaatsEersteKlas + part.zitplaatsen.klapstoelEersteKlas
-            const totalSeatsSecondClass = !part.zitplaatsen ? 0 : part.zitplaatsen.zitplaatsTweedeKlas + part.zitplaatsen.klapstoelTweedeKlas + (isQbuzzDMG ? part.zitplaatsen.zitplaatsEersteKlas + part.zitplaatsen.klapstoelEersteKlas : 0)
+            const totalSeatsFirstClass = !part.zitplaatsen ? 0 : part.zitplaatsen.zitplaatsEersteKlas + part.zitplaatsen.klapstoelEersteKlas
+            const totalSeatsSecondClass = !part.zitplaatsen ? 0 : part.zitplaatsen.zitplaatsTweedeKlas + part.zitplaatsen.klapstoelTweedeKlas
 
             return {
                 id: part.materieelnummer,
@@ -43,14 +55,14 @@ export async function transformNsTrainInfo(it, stationLookUp) {
                     powerSockets: part.faciliteiten.includes("STROOM") && !isQbuzzDMG,
                     wifi: part.faciliteiten.includes("WIFI"),
                     wheelchairAccessible: part.faciliteiten.includes("TOEGANKELIJK"),
-                    bicycles: part.faciliteiten.includes("FIETS"),
+                    bicycles: part.faciliteiten.includes("FIETS") || isQbuzzDMG,
                     bar: part.faciliteiten.includes("BISTRO"),
                     firstClass: totalSeatsFirstClass > 0
                 },
                 image: imageUrl,
                 seats: totalSeatsSecondClass,
                 seatsFirstClass: totalSeatsFirstClass,
-                destinationStationId: (await stationLookUp(part.eindbestemming)).id
+                destinationStationId: part.eindbestemming ? (await stationLookUp(part.eindbestemming)).id : null
             }
         })),
         shortened: it.ingekort,

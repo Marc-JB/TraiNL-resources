@@ -1,4 +1,4 @@
-import { Departure } from "./departure.js"
+import moment from "moment"
 
 /**
  * @typedef {{
@@ -10,7 +10,6 @@ import { Departure } from "./departure.js"
  *     coordinates: { latitude: number, longitude: number },
  *     alternativeNames: string[],
  *     platforms: string[],
- *     departures?: Departure[]
  * }} Station
  */
 

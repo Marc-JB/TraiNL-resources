@@ -1,58 +1,56 @@
 import env from "./env.js"
 import express from "express"
-import legacy from "./legacy/app.js"
 import { expire } from "./expire.js"
 import { Cache } from "./data-access/cache.js"
 import { OVgoStaticAPI } from "./data-access/ovgostatic-api.js"
 import { NsApi } from "./data-access/ns-api.js"
 import { transformNsDeparture } from "./transformations/departure.js"
 import { transformNsTrainInfo } from "./transformations/train-info.js"
+import legacy from "./legacy/app.js"
 
 class CacheManager {
-    constructor() {
-        /** @type {Cache<import("./models/station").Station[]>} */
-        this.stations = new Cache(60 * 60 * 24, OVgoStaticAPI.getStations)
+    /** @type {Cache<import("./models/station").Station[]>} */
+    #stations = new Cache(60 * 60 * 24, OVgoStaticAPI.getStations)
 
-        /** @type {Map<number, Map<string, Cache<import("./models/departure.js").Departure[]>>>} */
-        this.departures = new Map()
+    /** @type {Map<number, Map<string, Cache<import("./models/departure.js").Departure[]>>>} */
+    #departures = new Map()
 
-        /** @type {Map<number, Cache<import("./models/traininfo").TrainInfo>>} */
-        this.journeys = new Map()
-    }
+    /** @type {Map<number, Cache<import("./models/traininfo").TrainInfo>>} */
+    #journeys = new Map()
 
     async getStations() {
-        return await this.stations.get()
+        return await this.#stations.get()
     }
 
     /**
      * @param {number} stationCode
-     * @param {string} language
+     * @param {"en" | "nl"} language
      */
     async getDepartures(stationCode, language) {
-        if(!this.departures.has(stationCode)) {
-            this.departures.set(stationCode, new Map())
+        if(!this.#departures.has(stationCode)) {
+            this.#departures.set(stationCode, new Map())
         }
 
-        if(!this.departures.get(stationCode).has(language)) {
-            this.departures.get(stationCode).set(language, new Cache(90, async () => {
+        if(!this.#departures.get(stationCode).has(language)) {
+            this.#departures.get(stationCode).set(language, new Cache(90, async () => {
                 const departures = await nsApi.getDepartures(stationCode, language)
-                const newDepartures = departures.map(departure => transformNsDeparture(departure, stationLookUp))
+                const newDepartures = departures.map(departure => transformNsDeparture(departure, stationLookUp, language))
                 return await Promise.all(newDepartures)
             }))
         }
 
-        return await this.departures.get(stationCode).get(language).get()
+        return await this.#departures.get(stationCode).get(language).get()
     }
 
     /**
      * @param {number} id
      */
     async getJourney(id){
-        if(!this.journeys.has(id)) {
-            this.journeys.set(id, new Cache(60 * 5, async () => await transformNsTrainInfo(await nsApi.getTrainInfo(id), stationLookUp)))
+        if(!this.#journeys.has(id)) {
+            this.#journeys.set(id, new Cache(60 * 5, async () => await transformNsTrainInfo(await nsApi.getTrainInfo(id), stationLookUp)))
         }
 
-        return await this.journeys.get(id).get()
+        return await this.#journeys.get(id).get()
     }
 }
 
@@ -69,9 +67,10 @@ const stationLookUp = async (id) => (await searchStations(id, true))[0]
 /**
  * @param {string} q
  * @param {boolean} onlyExactMatches
+ * @param {number} [limit]
  * @returns {Promise<import("./models/station").Station[]>}
  */
-async function searchStations(q, onlyExactMatches) {
+async function searchStations(q, onlyExactMatches, limit = 10) {
     const stations = await cacheManager.getStations()
 
     /** @type {(it: import("./models/station").Station) => boolean} */
@@ -86,7 +85,7 @@ async function searchStations(q, onlyExactMatches) {
                 exactMatchFunction(b) && !exactMatchFunction(a) ? 1 :
                     a.name.toLowerCase().startsWith(q.toLowerCase()) && !b.name.toLowerCase().startsWith(q.toLowerCase()) ? -1 :
                         b.name.toLowerCase().startsWith(q.toLowerCase()) && !a.name.toLowerCase().startsWith(q.toLowerCase()) ? 1 : 0
-        ).slice(0, 10)
+        ).slice(0, limit)
 }
 
 const server = express()
@@ -99,15 +98,10 @@ server.get("/api/v0/stations.json", async (request, response) => {
 })
 
 server.get("/api/v0/stations/:id.json", async (request, response) => {
-    const language = (request.headers["accept-language"] || "en").split(",")[0]
     const stationCode = parseInt(request.params.id)
 
     const stations = await cacheManager.getStations()
-    const station = stations.find(it => it.id == stationCode)
-
-    if(request.query["withDepartures"] === "true") {
-        station.departures = await cacheManager.getDepartures(stationCode, language)
-    }
+    const station = stations.find(it => it.id === stationCode)
 
     expire(response, 90)
     response.status(200).json(station)
@@ -117,8 +111,11 @@ server.get("/api/v0/stations/:id/departures.json", async (request, response) => 
     const language = (request.headers["accept-language"] || "en").split(",")[0]
     const stationCode = parseInt(request.params.id)
 
+    // @ts-ignore
+    const departures = await cacheManager.getDepartures(stationCode, language)
+
     expire(response, 90)
-    response.status(200).json(await cacheManager.getDepartures(stationCode, language))
+    response.status(200).json(departures)
 })
 
 server.get("/api/v0/journeys/:id.json", async (request, response) => {

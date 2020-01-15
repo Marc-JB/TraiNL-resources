@@ -1,5 +1,4 @@
 import moment from "moment"
-import { TrainInfo } from "./traininfo.js"
 
 /**
  * @typedef {{
@@ -18,7 +17,6 @@ import { TrainInfo } from "./traininfo.js"
  *     warnings: string[]
  *     info: string[]
  *     departureStatus: "UNDERWAY" | "ARRIVED" | "DEPARTED"
- *     trainComposition?: TrainInfo
  * }} Departure
  */
 
