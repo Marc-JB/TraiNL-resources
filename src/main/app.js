@@ -91,12 +91,18 @@ async function searchStations(q, onlyExactMatches, limit = 10) {
 async function main() {
     const serverBuilder = new WebServer.Builder()
     if(env.PORT) serverBuilder.setPort(env.PORT)
-    if(env.CERT && env.KEY) {
+    /*if(env.CERT && env.KEY) {
         serverBuilder.setKey(env.KEY).setCert(env.CERT)
-    } else {
+    } else {*/
         serverBuilder.useHttp1()
-    }
+    //}
     const server = await serverBuilder.build()
+
+    server.root.get(".well-known/acme-challenge/3TeCYOldD9nxKzJo9JEmZMfxHEWsw7Ajy5fGz_PwIss", _ => {
+        return new ResponseBuilder()
+            .setPlainTextBody("3TeCYOldD9nxKzJo9JEmZMfxHEWsw7Ajy5fGz_PwIss.KBGHgt6UgZKHnPlzfOfZTy1_2sBk2Vl2n-tq2CLglO8")
+            .build()
+    })
 
     const oldApi = server.root.createEndpointAtPath("api/v1")
     legacy(oldApi)
