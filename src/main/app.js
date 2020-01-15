@@ -89,10 +89,14 @@ async function searchStations(q, onlyExactMatches, limit = 10) {
 }
 
 async function main() {
-    const server = await new WebServer.Builder()
-        .setPort(env.PORT || 8080)
-        .useHttp1()
-        .build()
+    const serverBuilder = new WebServer.Builder()
+    if(env.PORT) serverBuilder.setPort(env.PORT)
+    if(env.CERT && env.KEY) {
+        serverBuilder.setKey(env.KEY).setCert(env.CERT)
+    } else {
+        serverBuilder.useHttp1()
+    }
+    const server = await serverBuilder.build()
 
     const oldApi = server.root.createEndpointAtPath("api/v1")
     legacy(oldApi)
