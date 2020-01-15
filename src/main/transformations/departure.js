@@ -11,9 +11,9 @@ export async function transformNsDeparture(it, stationLookUp, language = "en") {
     let { operatorName, longCategoryName } = it.product
 
     if (operatorName.toLowerCase() === "r-net" && longCategoryName.toLowerCase() === "sprinter") {
-        operatorName = `R-net ${language === "en" ? "by" : "door"} Qbuzz`
-    } else if (operatorName.toLowerCase() === "r-net" && longCategoryName.toLowerCase() === "stoptrein") {
         operatorName = `R-net ${language === "en" ? "by" : "door"} NS`
+    } else if (operatorName.toLowerCase() === "r-net" && longCategoryName.toLowerCase() === "stoptrein") {
+        operatorName = `R-net ${language === "en" ? "by" : "door"} Qbuzz`
     }
 
     const plannedDepartureTime = moment(it.plannedDateTime)
