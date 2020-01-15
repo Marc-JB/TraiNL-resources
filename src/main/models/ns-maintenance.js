@@ -15,7 +15,7 @@ import moment from "moment"
  *         impact: number
  *         maatschappij: number
  *         landelijk: boolean
- *         oorzaak: "werkzaamheden"
+ *         oorzaak: string
  *         header: string
  *         periode: string
  *         trajecten: { stations: string[], begintijd: string, eindtijd: string, richting: "HEEN" | "HEEN_EN_TERUG" }[]
