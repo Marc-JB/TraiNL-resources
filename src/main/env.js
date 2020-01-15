@@ -7,5 +7,6 @@ export default {
     NS_API_KEY: process.env.NS_API_KEY,
     PORT: process.env.PORT,
     KEY: process.env.KEY,
-    CERT: process.env.CERT
+    CERT: process.env.CERT,
+    CHAIN: process.env.CHAIN
 }

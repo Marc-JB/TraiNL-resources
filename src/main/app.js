@@ -93,8 +93,10 @@ async function main() {
 
     if(env.PORT) serverBuilder.setPort(env.PORT)
 
-    if(env.CERT && env.KEY) serverBuilder.setKey(env.KEY).setCert(env.CERT)
-    else serverBuilder.useHttp1()
+    if(env.CERT && env.KEY) {
+        serverBuilder.setKey(env.KEY).setCert(env.CERT)
+        if(env.CHAIN) serverBuilder.setChain(env.CHAIN)
+    } else serverBuilder.useHttp1()
 
     const server = await serverBuilder.build()
 
