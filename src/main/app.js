@@ -6,6 +6,7 @@ import { OVgoStaticAPI } from "./data-access/ovgostatic-api.js"
 import { NsApi } from "./data-access/ns-api.js"
 import { transformNsDeparture } from "./transformations/departure.js"
 import { transformNsTrainInfo } from "./transformations/train-info.js"
+import legacy from "./legacy/app.js"
 
 class CacheManager {
     /** @type {Cache<import("./models/station").Station[]>} */
@@ -88,6 +89,7 @@ async function searchStations(q, onlyExactMatches, limit = 10) {
 }
 
 const server = express()
+legacy(server)
 
 server.get("/api/v0/stations.json", async (request, response) => {
     let query = request.query.q
