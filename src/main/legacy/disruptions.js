@@ -5,6 +5,7 @@
 import { NsApi } from "./ns-api.js"
 import moment from "moment"
 import { expire } from "../expire.js"
+import { ResponseBuilder } from "../webserver.js"
 
 const api = NsApi.INSTANCE
 
@@ -83,13 +84,12 @@ function mapDisruption(disruption, language) {
 
 /**
  * @deprecated
- * @param {import("express").Request} request
- * @param {import("express").Response} response
+ * @param {import("@peregrine/webserver").ReadonlyHttpRequest} request
  */
-export const getDisruptions = async(request, response) => {
-    const language = (request.headers["accept-language"] || "en").split(",")[0]
+export const getDisruptions = async(request) => {
+    const language = (request.acceptedLanguages || [["en", 1]])[0][0].split("-")[0]
 
-    const disruptions = (await api.getDisruptions(request.query.actual || true, language))
+    const disruptions = (await api.getDisruptions(request.url.query.get("actual") === "false" ? false : true, language))
         .map(it => mapDisruption(it, language))
         .filter(it => !!it && !!it.id && !!it.type && !!it.title)
         .map(it => ({
@@ -105,6 +105,8 @@ export const getDisruptions = async(request, response) => {
             endDate: it.endDate || null
         }))
 
-    expire(response, 60 * 2)
-    response.status(200).json(disruptions)
+    const repsonseBuilder = new ResponseBuilder()
+    expire(repsonseBuilder, 60 * 2)
+    repsonseBuilder.setJsonBody(disruptions)
+    return repsonseBuilder.build()
 }
