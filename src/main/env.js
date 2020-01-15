@@ -5,5 +5,7 @@ if(process.env.NS_API_KEY === undefined)
 
 export default {
     NS_API_KEY: process.env.NS_API_KEY,
-    PORT: process.env.PORT
+    PORT: process.env.PORT,
+    KEY: process.env.KEY,
+    CERT: process.env.CERT
 }
