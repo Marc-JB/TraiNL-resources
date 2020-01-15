@@ -2,10 +2,10 @@ import { getDisruptions } from "./disruptions.js"
 import { getDeparturesForStation, getStations } from "./stations.js"
 
 /**
- * @param {import("express").Express} server
+ * @param {import("@peregrine/webserver").Endpoint} endpoint
  */
-export default function(server) {
-    server.get("/api/v1/stations/:id/departures.json", getDeparturesForStation)
-    server.get("/api/v1/stations.json", getStations)
-    server.get("/api/v1/disruptions.json", getDisruptions)
+export default function(endpoint) {
+    endpoint.get("stations/{id}/departures.json", getDeparturesForStation)
+    endpoint.get("stations.json", getStations)
+    endpoint.get("disruptions.json", getDisruptions)
 }

@@ -1,5 +1,5 @@
 import env from "./env.js"
-import express from "express"
+import { WebServer, ResponseBuilder } from "./webserver.js"
 import { expire } from "./expire.js"
 import { Cache } from "./data-access/cache.js"
 import { OVgoStaticAPI } from "./data-access/ovgostatic-api.js"
@@ -88,40 +88,55 @@ async function searchStations(q, onlyExactMatches, limit = 10) {
         ).slice(0, limit)
 }
 
-const server = express()
-legacy(server)
+async function main() {
+    const server = await new WebServer.Builder()
+        .setPort(env.PORT || 8080)
+        .useHttp1()
+        .build()
 
-server.get("/api/v0/stations.json", async (request, response) => {
-    let query = request.query.q
-    expire(response, 60 * 60 * 24 * 5)
-    response.status(200).json(query ? await searchStations(query, false) : await cacheManager.getStations())
-})
+    const oldApi = server.root.createEndpointAtPath("api/v1")
+    legacy(oldApi)
 
-server.get("/api/v0/stations/:id.json", async (request, response) => {
-    const stationCode = parseInt(request.params.id)
+    const newApi = server.root.createEndpointAtPath("api/v0")
 
-    const stations = await cacheManager.getStations()
-    const station = stations.find(it => it.id === stationCode)
+    newApi.get("stations.json", async (request) => {
+        let query = request.url.query.get("q")
+        const responseBuilder = new ResponseBuilder()
+        expire(responseBuilder, 60 * 60 * 24 * 5)
+        responseBuilder.setJsonBody(query && typeof query === "string" ? await searchStations(query, false) : await cacheManager.getStations())
+        return responseBuilder.build()
+    })
 
-    expire(response, 90)
-    response.status(200).json(station)
-})
+    newApi.get("stations/{id}.json", async (request) => {
+        const stationCode = parseInt(request.url.params.get("id"))
 
-server.get("/api/v0/stations/:id/departures.json", async (request, response) => {
-    const language = (request.headers["accept-language"] || "en").split(",")[0]
-    const stationCode = parseInt(request.params.id)
+        const stations = await cacheManager.getStations()
+        const station = stations.find(it => it.id === stationCode)
 
-    // @ts-ignore
-    const departures = await cacheManager.getDepartures(stationCode, language)
+        const responseBuilder = new ResponseBuilder()
+        expire(responseBuilder, 90)
+        responseBuilder.setJsonBody(station)
+        return responseBuilder.build()
+    })
 
-    expire(response, 90)
-    response.status(200).json(departures)
-})
+    newApi.get("stations/{id}/departures.json", async (request) => {
+        const language = (request.acceptedLanguages || [["en", 1]])[0][0].split("-")[0]
+        const stationCode = parseInt(request.url.params.get("id"))
+        const responseBuilder = new ResponseBuilder()
+        expire(responseBuilder, 90)
+        responseBuilder.setJsonBody(await cacheManager.getDepartures(stationCode, language))
+        return responseBuilder.build()
+    })
 
-server.get("/api/v0/journeys/:id.json", async (request, response) => {
-    const journeyId = parseInt(request.params.id)
-    expire(response, 60 * 5)
-    response.status(200).json(await cacheManager.getJourney(journeyId))
-})
+    newApi.get("journeys/{id}.json", async (request) => {
+        const journeyId = parseInt(request.url.params.get("id"))
+        const responseBuilder = new ResponseBuilder()
+        expire(responseBuilder, 60 * 5)
+        responseBuilder.setJsonBody(await cacheManager.getJourney(journeyId))
+        return responseBuilder.build()
+    })
 
-server.listen(env.PORT || "8080")
+    await server.listen()
+}
+
+main().catch(console.error)

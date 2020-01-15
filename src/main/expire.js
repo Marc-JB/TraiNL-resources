@@ -1,7 +1,7 @@
 import moment from "moment"
 
 /**
- * @param {import("express").Response} response
+ * @param {import("@peregrine/webserver").ResponseBuilder} response
  * @param {number} expirationInSeconds
  */
 export function expire(response, expirationInSeconds) {

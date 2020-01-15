@@ -5,6 +5,7 @@
 import { NsApi } from "./ns-api.js"
 import { expire } from "../expire.js"
 import moment from "moment"
+import { ResponseBuilder } from "../webserver.js"
 
 const api = NsApi.INSTANCE
 
@@ -110,27 +111,29 @@ async function mapDeparture(departure, stationCode) {
 
 /**
  * @deprecated
- * @param {import("express").Request} request
- * @param {import("express").Response} response
+ * @param {import("@peregrine/webserver").ReadonlyHttpRequest} request
  */
-export const getDeparturesForStation = async(request, response) => {
-    const language = (request.headers["accept-language"] || "en").split(",")[0]
+export const getDeparturesForStation = async(request) => {
+    const language = request.acceptedLanguages.size > 0 ? Array.from(request.acceptedLanguages)[0][0].split("-")[0] : "en"
 
-    const stationCode = request.params.id
+    const stationCode = request.url.params.get("id")
 
     const departures = (await api.getDepartures(stationCode, language))
         .map(departure => mapDeparture(departure, stationCode))
 
-    expire(response, 90)
-    response.status(200).json(await Promise.all(departures))
+    const responseBuilder = new ResponseBuilder()
+    expire(responseBuilder, 90)
+    responseBuilder.setJsonBody(await Promise.all(departures))
+    return responseBuilder.build()
 }
 
 /**
  * @deprecated
- * @param {import("express").Request} request
- * @param {import("express").Response} response
+ * @param {import("@peregrine/webserver").ReadonlyHttpRequest} _
  */
-export const getStations = async(request, response) => {
-    expire(response, 60 * 60 * 24 * 5)
-    response.status(200).json(await api.getAllStations(/*request.query.getFromNs === "true"*/))
+export const getStations = async(_) => {
+    const responseBuilder = new ResponseBuilder()
+    expire(responseBuilder, 60 * 60 * 24 * 5)
+    responseBuilder.setJsonBody(await api.getAllStations(/*request.query.getFromNs === "true"*/))
+    return responseBuilder.build()
 }
