@@ -14,14 +14,14 @@ export async function fixNsDeparture(data, it, language = "en") {
 
     await Promise.all([
         (async () => {
-            it.direction = it.direction ? (await searchStation(data, it.direction)).name : it.direction
+            it.direction = it.direction ? ((await searchStation(data, it.direction)) || { name: it.direction }).name : it.direction
         })(),
         (async () => {
             it.routeStations = it.routeStations ? await Promise.all(
                 it.routeStations.map(async it => ({
                     uicCode: it.uicCode,
-                    mediumName: (await searchStation(data, it.mediumName)).name })
-                )
+                    mediumName: (await data.getStations()).find(s => s.id === parseInt(it.uicCode)).name
+                }))
             ) : []
         })()
     ])

@@ -1,6 +1,6 @@
 import moment from "moment"
-import { fixNsDeparture } from "./fix-departure"
-import { searchStation } from "../searchStations"
+import { fixNsDeparture } from "./fix-departure.js"
+import { searchStation } from "../searchStations.js"
 
 /**
  * @throws {Error}

@@ -1,5 +1,5 @@
 import moment from "moment"
-import { fixNsDeparture } from "./fix-departure"
+import { fixNsDeparture } from "./fix-departure.js"
 
 /**
  * @deprecated
