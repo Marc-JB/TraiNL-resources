@@ -37,7 +37,7 @@ export class NsApi {
     /**
      * @param {boolean} actual True if the disruptions should be actual.
      * @param {string} lang The language of the response
-     * @returns {Promise<{ [key: string]: any }[]>}
+     * @returns {Promise<(import("../models/ns-disruption.js").NsDisruption | import("../models/ns-maintenance").NsMaintenance)[]>}
      */
     async getDisruptions(actual = true, lang) {
         try {
@@ -50,7 +50,7 @@ export class NsApi {
     /**
      * @param {string} id The station code or id
      * @param {string} lang The language of the response
-     * @returns {Promise<{ [key: string]: any }[]>}
+     * @returns {Promise<import("../models/ns-departure.js").NsDeparture[]>}
      */
     async getDepartures(id, lang) {
         const params = {
@@ -68,20 +68,17 @@ export class NsApi {
     }
 
     /**
+     * @throws {Error}
      * @param {number} journeyNumber The journey number
      * @param {string} departureStationCode The station code of the departure station
      * @param {import("moment").Moment} departureTime The time of the departure
-     * @returns {Promise<{ [key: string]: any }>}
+     * @returns {Promise<import("../models/ns-traininfo.js").NsTrainInfo>}
      */
     async getTrainInfo(journeyNumber, departureStationCode, departureTime) {
-        try {
-            return (await this.#nsTrainApi.get(`trein/${journeyNumber}/${departureStationCode}`, {
-                params: {
-                    dateTime: departureTime.format("YYYY-MM-DDTHH:mm")
-                }
-            })).data
-        } catch (error) {
-            return {}
-        }
+        return (await this.#nsTrainApi.get(`trein/${journeyNumber}/${departureStationCode}`, {
+            params: {
+                dateTime: departureTime.format("YYYY-MM-DDTHH:mm")
+            }
+        })).data
     }
 }

@@ -71,7 +71,7 @@ async function getTrainComposition(journeyNumber, stationCode, departureTime) {
 
 /**
  * @deprecated
- * @param {{ [key: string]: any }} departure
+ * @param {import("../models/ns-departure.js").NsDeparture} departure
  * @param {string} stationCode
  */
 async function mapDeparture(departure, stationCode) {
@@ -83,7 +83,7 @@ async function mapDeparture(departure, stationCode) {
     const plannedDepartureTime = moment(departure.plannedDateTime)
     const actualDepartureTime = moment(departure.actualDateTime || departure.plannedDateTime)
 
-    const trainComposition = await getTrainComposition(departure.product.number, stationCode, plannedDepartureTime)
+    const trainComposition = await getTrainComposition(parseInt(departure.product.number), stationCode, plannedDepartureTime)
 
     return {
         direction: departure.direction,
