@@ -95,7 +95,7 @@ async function main() {
 
     if(env.CERT && env.KEY) {
         serverBuilder.setKey(env.KEY).setCert(env.CERT)
-        if(env.CHAIN) serverBuilder.setChain(env.CHAIN)
+        if(env.CA) serverBuilder.setCA(env.CA)
     } else serverBuilder.useHttp1()
 
     const server = await serverBuilder.build()

@@ -17,7 +17,7 @@
   "author": "Marc apps & software",
   "license": "UNLICENSED",
   "dependencies": {
-    "@peregrine/webserver": "^0.5.10",
+    "@peregrine/webserver": "^0.5.11",
     "axios": "^0.19.1",
     "dotenv": "^8.2.0",
     "moment": "^2.24.0"

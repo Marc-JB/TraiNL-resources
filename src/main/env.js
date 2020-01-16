@@ -8,5 +8,5 @@ export default {
     PORT: process.env.PORT,
     KEY: process.env.KEY,
     CERT: process.env.CERT,
-    CHAIN: process.env.CHAIN
+    CA: process.env.CA
 }
