@@ -1,22 +1,12 @@
-/**
- * @fileoverview Functions used for the Station API
- */
-
-import { NsApi } from "./ns-api.js"
-import { expire } from "../expire.js"
 import moment from "moment"
-import { ResponseBuilder } from "../webserver.js"
-
-const api = NsApi.INSTANCE
 
 /**
  * @deprecated
  * @param {number} journeyNumber
- * @param {string} stationCode
- * @param {moment.Moment} departureTime
+ * @param { import("../data-access/ApiCacheManager").ApiCacheManager } data
  */
-async function getTrainComposition(journeyNumber, stationCode, departureTime) {
-    const trainInfo = await api.getTrainInfo(journeyNumber, stationCode, departureTime)
+export async function getTrainCompositionLegacy(journeyNumber, data) {
+    const trainInfo = await data.getJourney(journeyNumber)
 
     const type = trainInfo.type ? trainInfo.type.toLowerCase() : ""
 
@@ -71,10 +61,10 @@ async function getTrainComposition(journeyNumber, stationCode, departureTime) {
 
 /**
  * @deprecated
- * @param {import("../models/ns-departure.js").NsDeparture} departure
- * @param {string} stationCode
+ * @param { import("../models/ns-departure.js").NsDeparture } departure
+ * @param { import("../data-access/ApiCacheManager").ApiCacheManager } data
  */
-async function mapDeparture(departure, stationCode) {
+export async function mapDepartureLegacy(departure, data) {
     let { operatorName, longCategoryName } = departure.product
     if (operatorName === "R-net") {
         operatorName = longCategoryName === "Sprinter" ? "R-net door NS" : "R-net door Qbuzz"
@@ -83,7 +73,7 @@ async function mapDeparture(departure, stationCode) {
     const plannedDepartureTime = moment(departure.plannedDateTime)
     const actualDepartureTime = moment(departure.actualDateTime || departure.plannedDateTime)
 
-    const trainComposition = await getTrainComposition(parseInt(departure.product.number), stationCode, plannedDepartureTime)
+    const trainComposition = await getTrainCompositionLegacy(parseInt(departure.product.number), data)
 
     return {
         direction: departure.direction,
@@ -107,22 +97,4 @@ async function mapDeparture(departure, stationCode) {
             message: message.message
         }))
     }
-}
-
-/**
- * @deprecated
- * @param {import("@peregrine/webserver").ReadonlyHttpRequest} request
- */
-export const getDeparturesForStation = async(request) => {
-    const language = request.acceptedLanguages.size > 0 ? Array.from(request.acceptedLanguages)[0][0].split("-")[0] : "en"
-
-    const stationCode = request.url.params.get("id")
-
-    const departures = (await api.getDepartures(stationCode, language))
-        .map(departure => mapDeparture(departure, stationCode))
-
-    const responseBuilder = new ResponseBuilder()
-    expire(responseBuilder, 90)
-    responseBuilder.setJsonBody(await Promise.all(departures))
-    return responseBuilder.build()
 }

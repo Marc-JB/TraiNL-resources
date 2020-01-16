@@ -1,77 +1,30 @@
 import env from "./env.js"
 import { WebServer, ResponseBuilder } from "./webserver.js"
 import { expire } from "./expire.js"
-import { Cache } from "./data-access/cache.js"
 import { OVgoStaticAPI } from "./data-access/ovgostatic-api.js"
 import { NsApi } from "./data-access/ns-api.js"
 import { transformNsDeparture } from "./transformations/departure.js"
 import { transformNsTrainInfo } from "./transformations/train-info.js"
-import legacy from "./legacy/app.js"
+import { loadDeparturesLegacy } from "./disruptions-legacy.js"
+import { ApiCacheManager } from "./data-access/ApiCacheManager.js"
+import { mapDepartureLegacy } from "./transformations/departure-legacy.js"
 
-class CacheManager {
-    /** @type {Cache<import("./models/station").Station[]>} */
-    #stations = new Cache(60 * 60 * 24, OVgoStaticAPI.getStations)
-
-    /** @type {Map<number, Map<string, Cache<import("./models/departure.js").Departure[]>>>} */
-    #departures = new Map()
-
-    /** @type {Map<number, Cache<import("./models/traininfo").TrainInfo>>} */
-    #journeys = new Map()
-
-    async getStations() {
-        return await this.#stations.get()
-    }
-
-    /**
-     * @param {number} stationCode
-     * @param {"en" | "nl"} language
-     */
-    async getDepartures(stationCode, language) {
-        if(!this.#departures.has(stationCode)) {
-            this.#departures.set(stationCode, new Map())
-        }
-
-        if(!this.#departures.get(stationCode).has(language)) {
-            this.#departures.get(stationCode).set(language, new Cache(90, async () => {
-                const departures = await nsApi.getDepartures(stationCode, language)
-                const newDepartures = departures.map(departure => transformNsDeparture(departure, stationLookUp, language))
-                return await Promise.all(newDepartures)
-            }))
-        }
-
-        return await this.#departures.get(stationCode).get(language).get()
-    }
-
-    /**
-     * @param {number} id
-     */
-    async getJourney(id){
-        if(!this.#journeys.has(id)) {
-            this.#journeys.set(id, new Cache(60 * 5, async () => await transformNsTrainInfo(await nsApi.getTrainInfo(id), stationLookUp)))
-        }
-
-        return await this.#journeys.get(id).get()
-    }
-}
-
-const cacheManager = new CacheManager()
-
-const nsApi = new NsApi(undefined, env.NS_API_KEY)
+const data = new ApiCacheManager(new NsApi(undefined, env.NS_API_KEY), OVgoStaticAPI)
 
 /**
  * @param {string} id
  * @returns {Promise<import("./models/station").Station>}
  */
-const stationLookUp = async (id) => (await searchStations(id, true))[0]
+const stationLookUp = async (id) => (await searchStations(id))[0]
 
 /**
  * @param {string} q
- * @param {boolean} onlyExactMatches
+ * @param {boolean} [onlyExactMatches]
  * @param {number} [limit]
  * @returns {Promise<import("./models/station").Station[]>}
  */
-async function searchStations(q, onlyExactMatches, limit = 10) {
-    const stations = await cacheManager.getStations()
+async function searchStations(q, onlyExactMatches = true, limit = 10) {
+    const stations = await data.getStations()
 
     /** @type {(it: import("./models/station").Station) => boolean} */
     const matchFunction = it => it.name.toLowerCase().includes(q.toLowerCase()) || it.code.toLowerCase().includes(q.toLowerCase()) || it.alternativeNames.some(it => it.toLowerCase().includes(q.toLowerCase()))
@@ -107,22 +60,29 @@ async function main() {
         let query = request.url.query.get("q")
         const responseBuilder = new ResponseBuilder()
         expire(responseBuilder, 60 * 60 * 24 * 5)
-        responseBuilder.setJsonBody(query && typeof query === "string" ? await searchStations(query, false) : await cacheManager.getStations())
+        responseBuilder.setJsonBody(query && typeof query === "string" ? await searchStations(query, false) : await data.getStations())
         return responseBuilder.build()
     }
 
-    const oldApi = server.root.createEndpointAtPath("api/v1")
-    legacy(oldApi)
-    oldApi.get("stations.json", fetchStations)
+    loadDeparturesLegacy(server.root.createEndpointAtPath("api/v1"), data)
 
-    const newApi = server.root.createEndpointAtPath("api/v0")
+    server.root.get("/api/v{v}/stations.json", fetchStations)
 
-    newApi.get("stations.json", fetchStations)
+    /**
+     * @param {import("@peregrine/webserver").ReadonlyHttpRequest} request
+     * @returns {"en" | "nl"}
+     */
+    function getLanguage(request) {
+        const [[primaryLanguage = "en"] = ["en", 1]] = request.acceptedLanguages
+        /** @type {"en" | "nl"} */
+        // @ts-ignore
+        return primaryLanguage.split("-")[0]
+    }
 
-    newApi.get("stations/{id}.json", async (request) => {
+    server.root.get("/api/v{v}/stations/{id}.json", async (request) => {
         const stationCode = parseInt(request.url.params.get("id"))
 
-        const stations = await cacheManager.getStations()
+        const stations = await data.getStations()
         const station = stations.find(it => it.id === stationCode)
 
         const responseBuilder = new ResponseBuilder()
@@ -131,20 +91,34 @@ async function main() {
         return responseBuilder.build()
     })
 
-    newApi.get("stations/{id}/departures.json", async (request) => {
-        const language = (request.acceptedLanguages || [["en", 1]])[0][0].split("-")[0]
-        const stationCode = parseInt(request.url.params.get("id"))
+    server.root.get("api/v{v}/stations/{id}/departures.json", async (request) => {
+        const language = getLanguage(request)
+        const isLegacyMode = request.url.params.get("v") === "1"
+        const stationCode = request.url.params.get("id")
+
+        const uicCode = isNaN(parseInt(stationCode)) ? (await data.getStations()).find(it => it.code === stationCode.toUpperCase()).id : parseInt(stationCode)
+
         const responseBuilder = new ResponseBuilder()
         expire(responseBuilder, 90)
-        responseBuilder.setJsonBody(await cacheManager.getDepartures(stationCode, language))
+
+        const nsDepartures = await data.getDepartures(uicCode, language)
+
+        if(isLegacyMode) {
+            const departures = nsDepartures.filter((_item, index) => index < 8).map(departure => mapDepartureLegacy(departure, data))
+            responseBuilder.setJsonBody(await Promise.all(departures))
+        } else {
+            const departures = nsDepartures.map(departure => transformNsDeparture(departure, stationLookUp, language))
+            responseBuilder.setJsonBody(await Promise.all(departures))
+        }
+
         return responseBuilder.build()
     })
 
-    newApi.get("journeys/{id}.json", async (request) => {
+    server.root.get("/api/v{v}/journeys/{id}.json", async (request) => {
         const journeyId = parseInt(request.url.params.get("id"))
         const responseBuilder = new ResponseBuilder()
         expire(responseBuilder, 60 * 5)
-        responseBuilder.setJsonBody(await cacheManager.getJourney(journeyId))
+        responseBuilder.setJsonBody(await transformNsTrainInfo(await data.getJourney(journeyId), stationLookUp))
         return responseBuilder.build()
     })
 
