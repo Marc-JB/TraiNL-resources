@@ -8,40 +8,9 @@ import { transformNsTrainInfo } from "./transformations/train-info.js"
 import { loadDeparturesLegacy } from "./disruptions-legacy.js"
 import { ApiCacheManager } from "./data-access/ApiCacheManager.js"
 import { mapDepartureLegacy } from "./transformations/departure-legacy.js"
+import { searchStations, searchStation } from "./searchStations.js"
 
-const data = new ApiCacheManager(new NsApi(undefined, env.NS_API_KEY), OVgoStaticAPI)
-
-/**
- * @param {string} id
- * @returns {Promise<import("./models/station").Station>}
- */
-const stationLookUp = async (id) => (await searchStations(id))[0]
-
-/**
- * @param {string} q
- * @param {boolean} [onlyExactMatches]
- * @param {number} [limit]
- * @returns {Promise<import("./models/station").Station[]>}
- */
-async function searchStations(q, onlyExactMatches = true, limit = 10) {
-    const stations = await data.getStations()
-
-    /** @type {(it: import("./models/station").Station) => boolean} */
-    const matchFunction = it => it.name.toLowerCase().includes(q.toLowerCase()) || it.code.toLowerCase().includes(q.toLowerCase()) || it.alternativeNames.some(it => it.toLowerCase().includes(q.toLowerCase()))
-
-    /** @type {(it: import("./models/station").Station) => boolean} */
-    const exactMatchFunction = it => it.name === q || it.code === q || it.alternativeNames.includes(q)
-
-    return stations.filter(onlyExactMatches ? exactMatchFunction : matchFunction)
-        .sort((a, b) =>
-            exactMatchFunction(a) && !exactMatchFunction(b) ? -1 :
-                exactMatchFunction(b) && !exactMatchFunction(a) ? 1 :
-                    a.name.toLowerCase().startsWith(q.toLowerCase()) && !b.name.toLowerCase().startsWith(q.toLowerCase()) ? -1 :
-                        b.name.toLowerCase().startsWith(q.toLowerCase()) && !a.name.toLowerCase().startsWith(q.toLowerCase()) ? 1 : 0
-        ).slice(0, limit)
-}
-
-async function main() {
+function buildServer(){
     const serverBuilder = new WebServer.Builder()
 
     if(env.PORT) serverBuilder.setPort(env.PORT)
@@ -51,7 +20,14 @@ async function main() {
         if(env.CA) serverBuilder.setCA(env.CA)
     } else serverBuilder.useHttp1()
 
-    const server = await serverBuilder.build()
+    return serverBuilder.build()
+}
+
+/**
+ * @param {ApiCacheManager} data
+ */
+async function main(data) {
+    const server = await buildServer()
 
     /**
      * @param {import("@peregrine/webserver").ReadonlyHttpRequest} request
@@ -60,7 +36,7 @@ async function main() {
         let query = request.url.query.get("q")
         const responseBuilder = new ResponseBuilder()
         expire(responseBuilder, 60 * 60 * 24 * 5)
-        responseBuilder.setJsonBody(query && typeof query === "string" ? await searchStations(query, false) : await data.getStations())
+        responseBuilder.setJsonBody(query && typeof query === "string" ? await searchStations(data, query, false) : await data.getStations())
         return responseBuilder.build()
     }
 
@@ -104,10 +80,10 @@ async function main() {
         const nsDepartures = await data.getDepartures(uicCode, language)
 
         if(isLegacyMode) {
-            const departures = nsDepartures.filter((_item, index) => index < 8).map(departure => mapDepartureLegacy(departure, data))
+            const departures = nsDepartures.filter((_item, index) => index < 8).map(departure => mapDepartureLegacy(data, departure))
             responseBuilder.setJsonBody(await Promise.all(departures))
         } else {
-            const departures = nsDepartures.map(departure => transformNsDeparture(departure, stationLookUp, language))
+            const departures = nsDepartures.map(departure => transformNsDeparture(data, departure, language))
             responseBuilder.setJsonBody(await Promise.all(departures))
         }
 
@@ -118,11 +94,11 @@ async function main() {
         const journeyId = parseInt(request.url.params.get("id"))
         const responseBuilder = new ResponseBuilder()
         expire(responseBuilder, 60 * 5)
-        responseBuilder.setJsonBody(await transformNsTrainInfo(await data.getJourney(journeyId), stationLookUp))
+        responseBuilder.setJsonBody(await transformNsTrainInfo(await data.getJourney(journeyId), id => searchStation(data, id)))
         return responseBuilder.build()
     })
 
     await server.listen()
 }
 
-main().catch(console.error)
+main(new ApiCacheManager(new NsApi(undefined, env.NS_API_KEY), OVgoStaticAPI)).catch(console.error)

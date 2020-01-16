@@ -1,4 +1,5 @@
 import moment from "moment"
+import { fixNsDeparture } from "./fix-departure"
 
 /**
  * @deprecated
@@ -61,38 +62,33 @@ export async function getTrainCompositionLegacy(journeyNumber, data) {
 
 /**
  * @deprecated
- * @param { import("../models/ns-departure.js").NsDeparture } departure
  * @param { import("../data-access/ApiCacheManager").ApiCacheManager } data
+ * @param { import("../models/ns-departure.js").NsDeparture } it
  */
-export async function mapDepartureLegacy(departure, data) {
-    let { operatorName, longCategoryName } = departure.product
-    if (operatorName === "R-net") {
-        operatorName = longCategoryName === "Sprinter" ? "R-net door NS" : "R-net door Qbuzz"
-    }
+export async function mapDepartureLegacy(data, it) {
+    const departure = await fixNsDeparture(data, it)
 
     const plannedDepartureTime = moment(departure.plannedDateTime)
-    const actualDepartureTime = moment(departure.actualDateTime || departure.plannedDateTime)
-
-    const trainComposition = await getTrainCompositionLegacy(parseInt(departure.product.number), data)
+    const actualDepartureTime = moment(departure.actualDateTime)
 
     return {
         direction: departure.direction,
         departureTime: plannedDepartureTime.format(),
         delay: actualDepartureTime.unix() - plannedDepartureTime.unix(),
         actualDepartureTime: actualDepartureTime.format(),
-        platform: departure.actualTrack || departure.plannedTrack || "-",
-        platformChanged: (departure.actualTrack && departure.actualTrack !== departure.plannedTrack) || false,
-        plannedPlatform: departure.plannedTrack || "-",
+        platform: departure.actualTrack,
+        platformChanged: departure.actualTrack !== departure.plannedTrack,
+        plannedPlatform: departure.plannedTrack,
         journeyNumber: parseInt(departure.product.number),
-        operator: operatorName,
-        category: longCategoryName,
-        cancelled: departure.cancelled || false,
-        trainComposition,
-        majorStops: (departure.routeStations || []).map(stop => ({
+        operator: departure.product.operatorName,
+        category: departure.product.longCategoryName,
+        cancelled: departure.cancelled,
+        trainComposition: await getTrainCompositionLegacy(parseInt(departure.product.number), data),
+        majorStops: departure.routeStations.map(stop => ({
             id: parseInt(stop.uicCode),
             name: stop.mediumName
         })),
-        messages: (departure.messages || []).map(message => ({
+        messages: departure.messages.map(message => ({
             type: message.style,
             message: message.message
         }))
