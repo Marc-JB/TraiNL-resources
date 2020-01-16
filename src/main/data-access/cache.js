@@ -32,7 +32,7 @@ export class Cache {
         return this.#lastRefresh === null || moment().subtract(this.#refreshAfter, "seconds").isAfter(this.#lastRefresh)
     }
 
-    get() {
+    get value() {
         if(this.shouldRefresh()) {
             this.#lastRefresh = moment()
             this.#cachePromise = this.#refreshFunction()

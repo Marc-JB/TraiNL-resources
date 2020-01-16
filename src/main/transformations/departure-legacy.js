@@ -1,22 +1,13 @@
-/**
- * @fileoverview Functions used for the Station API
- */
-
-import { NsApi } from "./ns-api.js"
-import { expire } from "../expire.js"
 import moment from "moment"
-import { ResponseBuilder } from "../webserver.js"
-
-const api = NsApi.INSTANCE
+import { fixNsDeparture } from "./fix-departure.js"
 
 /**
  * @deprecated
  * @param {number} journeyNumber
- * @param {string} stationCode
- * @param {moment.Moment} departureTime
+ * @param { import("../data-access/ApiCacheManager").ApiCacheManager } data
  */
-async function getTrainComposition(journeyNumber, stationCode, departureTime) {
-    const trainInfo = await api.getTrainInfo(journeyNumber, stationCode, departureTime)
+export async function getTrainCompositionLegacy(journeyNumber, data) {
+    const trainInfo = await data.getJourney(journeyNumber)
 
     const type = trainInfo.type ? trainInfo.type.toLowerCase() : ""
 
@@ -71,69 +62,35 @@ async function getTrainComposition(journeyNumber, stationCode, departureTime) {
 
 /**
  * @deprecated
- * @param {{ [key: string]: any }} departure
- * @param {string} stationCode
+ * @param { import("../data-access/ApiCacheManager").ApiCacheManager } data
+ * @param { import("../models/ns-departure.js").NsDeparture } it
  */
-async function mapDeparture(departure, stationCode) {
-    let { operatorName, longCategoryName } = departure.product
-    if (operatorName === "R-net") {
-        operatorName = longCategoryName === "Sprinter" ? "R-net door NS" : "R-net door Qbuzz"
-    }
+export async function mapDepartureLegacy(data, it) {
+    const departure = await fixNsDeparture(data, it)
 
     const plannedDepartureTime = moment(departure.plannedDateTime)
-    const actualDepartureTime = moment(departure.actualDateTime || departure.plannedDateTime)
-
-    const trainComposition = await getTrainComposition(departure.product.number, stationCode, plannedDepartureTime)
+    const actualDepartureTime = moment(departure.actualDateTime)
 
     return {
         direction: departure.direction,
         departureTime: plannedDepartureTime.format(),
         delay: actualDepartureTime.unix() - plannedDepartureTime.unix(),
         actualDepartureTime: actualDepartureTime.format(),
-        platform: departure.actualTrack || departure.plannedTrack || "-",
-        platformChanged: (departure.actualTrack && departure.actualTrack !== departure.plannedTrack) || false,
-        plannedPlatform: departure.plannedTrack || "-",
+        platform: departure.actualTrack,
+        platformChanged: departure.actualTrack !== departure.plannedTrack,
+        plannedPlatform: departure.plannedTrack,
         journeyNumber: parseInt(departure.product.number),
-        operator: operatorName,
-        category: longCategoryName,
-        cancelled: departure.cancelled || false,
-        trainComposition,
-        majorStops: (departure.routeStations || []).map(stop => ({
+        operator: departure.product.operatorName,
+        category: departure.product.longCategoryName,
+        cancelled: departure.cancelled,
+        trainComposition: await getTrainCompositionLegacy(parseInt(departure.product.number), data),
+        majorStops: departure.routeStations.map(stop => ({
             id: parseInt(stop.uicCode),
             name: stop.mediumName
         })),
-        messages: (departure.messages || []).map(message => ({
+        messages: departure.messages.map(message => ({
             type: message.style,
             message: message.message
         }))
     }
-}
-
-/**
- * @deprecated
- * @param {import("@peregrine/webserver").ReadonlyHttpRequest} request
- */
-export const getDeparturesForStation = async(request) => {
-    const language = request.acceptedLanguages.size > 0 ? Array.from(request.acceptedLanguages)[0][0].split("-")[0] : "en"
-
-    const stationCode = request.url.params.get("id")
-
-    const departures = (await api.getDepartures(stationCode, language))
-        .map(departure => mapDeparture(departure, stationCode))
-
-    const responseBuilder = new ResponseBuilder()
-    expire(responseBuilder, 90)
-    responseBuilder.setJsonBody(await Promise.all(departures))
-    return responseBuilder.build()
-}
-
-/**
- * @deprecated
- * @param {import("@peregrine/webserver").ReadonlyHttpRequest} _
- */
-export const getStations = async(_) => {
-    const responseBuilder = new ResponseBuilder()
-    expire(responseBuilder, 60 * 60 * 24 * 5)
-    responseBuilder.setJsonBody(await api.getAllStations(/*request.query.getFromNs === "true"*/))
-    return responseBuilder.build()
 }
