@@ -126,14 +126,3 @@ export const getDeparturesForStation = async(request) => {
     responseBuilder.setJsonBody(await Promise.all(departures))
     return responseBuilder.build()
 }
-
-/**
- * @deprecated
- * @param {import("@peregrine/webserver").ReadonlyHttpRequest} _
- */
-export const getStations = async(_) => {
-    const responseBuilder = new ResponseBuilder()
-    expire(responseBuilder, 60 * 60 * 24 * 5)
-    responseBuilder.setJsonBody(await api.getAllStations(/*request.query.getFromNs === "true"*/))
-    return responseBuilder.build()
-}

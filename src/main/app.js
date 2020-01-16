@@ -100,18 +100,24 @@ async function main() {
 
     const server = await serverBuilder.build()
 
-    const oldApi = server.root.createEndpointAtPath("api/v1")
-    legacy(oldApi)
-
-    const newApi = server.root.createEndpointAtPath("api/v0")
-
-    newApi.get("stations.json", async (request) => {
+    /**
+     * @param {import("@peregrine/webserver").ReadonlyHttpRequest} request
+     */
+    const fetchStations = async (request) => {
         let query = request.url.query.get("q")
         const responseBuilder = new ResponseBuilder()
         expire(responseBuilder, 60 * 60 * 24 * 5)
         responseBuilder.setJsonBody(query && typeof query === "string" ? await searchStations(query, false) : await cacheManager.getStations())
         return responseBuilder.build()
-    })
+    }
+
+    const oldApi = server.root.createEndpointAtPath("api/v1")
+    legacy(oldApi)
+    oldApi.get("stations.json", fetchStations)
+
+    const newApi = server.root.createEndpointAtPath("api/v0")
+
+    newApi.get("stations.json", fetchStations)
 
     newApi.get("stations/{id}.json", async (request) => {
         const stationCode = parseInt(request.url.params.get("id"))

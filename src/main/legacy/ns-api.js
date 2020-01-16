@@ -4,17 +4,12 @@
 
 import axios from "axios"
 import env from "../env.js"
-import { transform } from "./stationsListBuilder.js"
 
 /** @type {NsApi} */
 let INSTANCE = null
 
 /** @deprecated */
 export class NsApi {
-    #ovGoStaticApi = axios.create({
-        baseURL: "https://Marc-JB.github.io/OVgo-api/"
-    })
-
     #nsApi = axios.create({
         baseURL: "https://gateway.apiportal.ns.nl/reisinformatie-api/api/v2/",
         headers: {
@@ -37,36 +32,6 @@ export class NsApi {
             INSTANCE = new NsApi()
 
         return INSTANCE
-    }
-
-    /**
-     * @param {boolean} getFromNs
-     * @returns {Promise<{
-     *     id: number,
-     *     code: string,
-     *     name: string,
-     *     country: { flag: string, code: string, name: string },
-     *     facilities: { travelAssistance: boolean, departureTimesBoard: boolean },
-     *     coordinates: { latitude: number, longitude: number },
-     *     alternativeNames: string[],
-     *     platforms: string[]
-     * }[]>}
-     */
-    async getAllStations(getFromNs = false) {
-        if(getFromNs){
-            const { data } = await this.#nsApi.get("stations")
-            return data.payload.map(transform)
-        }
-
-        if (!this.stationsCache) {
-            try {
-                this.stationsCache = (await this.#ovGoStaticApi.get("stations.json")).data
-            } catch (error) {
-                return []
-            }
-        }
-
-        return this.stationsCache
     }
 
     /**
