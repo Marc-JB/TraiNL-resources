@@ -1,6 +1,5 @@
 import moment from "moment"
 import { ResponseBuilder } from "./webserver.js"
-import { expire } from "./expire.js"
 
 /**
  * @param {import("@peregrine/webserver").Endpoint} endpoint
@@ -34,10 +33,10 @@ export function loadDeparturesLegacy(endpoint, data) {
                 endDate: it.endDate || null
             }))
 
-        const repsonseBuilder = new ResponseBuilder()
-        expire(repsonseBuilder, 60 * 2)
-        repsonseBuilder.setJsonBody(disruptions)
-        return repsonseBuilder.build()
+        return new ResponseBuilder()
+            .setCacheExpiration(60 * 2)
+            .setJsonBody(disruptions)
+            .build()
     })
 }
 
