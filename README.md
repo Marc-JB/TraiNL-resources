@@ -18,5 +18,5 @@ This work is licensed under a [Creative Commons Attribution-NonCommercial-NoDeri
 
 ## Implemented
 * ES2015/6 modules
-* Types using JSDoc
-* ESLint
+* Types using mixed JSDoc & TypeScript
+* ~~ESLint~~

@@ -64,7 +64,7 @@ export async function getTrainCompositionLegacy(journeyNumber, data) {
 /**
  * @deprecated
  * @param { import("../data-access/ApiCacheManager").ApiCacheManager } data
- * @param { import("../models/ns-departure.js").NsDeparture } it
+ * @param { import("../models/NsDeparture").NsDeparture } it
  */
 export async function mapDepartureLegacy(data, it) {
     const departure = await fixNsDeparture(data, it)

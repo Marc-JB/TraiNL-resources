@@ -1,8 +1,8 @@
 /**
- * @param {import("../models/ns-traininfo.js").NsTrainInfo} it
- * @param {(id: string) => Promise<import("../models/station.js").Station>} stationLookUp
+ * @param {import("../models/NsTrainInfo").NsTrainInfo} it
+ * @param {(id: string) => Promise<import("../models/Station").Station>} stationLookUp
  * @param {"en" | "nl"} [language]
- * @returns {Promise<import("../models/traininfo.js").TrainInfo>}
+ * @returns {Promise<import("../models/TrainInfo").TrainInfo>}
  */
 export async function transformNsTrainInfo(it, stationLookUp, language = "en") {
     const type = it.type ? it.type.toLowerCase() : ""

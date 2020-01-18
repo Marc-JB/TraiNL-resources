@@ -10,16 +10,16 @@ export class ApiCacheManager {
     /** @type {Cache<import("../models/station").Station[]>} */
     #stations = new Cache(60 * 60 * 24, () => this.#ovGoApi.getStations())
 
-    /** @type {Map<number, Map<string, Cache<import("../models/ns-departure").NsDeparture[]>>>} */
+    /** @type {Map<number, Map<string, Cache<import("../models/NsDeparture").NsDeparture[]>>>} */
     #departures = new Map()
 
-    /** @type {Map<number, Cache<import("../models/ns-traininfo").NsTrainInfo>>} */
+    /** @type {Map<number, Cache<import("../models/NsTrainInfo").NsTrainInfo>>} */
     #journeys = new Map()
 
-    /** @type {Map<string, Cache<import("../models/ns-disruption").NsDisruption[]>>} */
+    /** @type {Map<string, Cache<import("../models/NsDisruption").NsDisruption[]>>} */
     #disruptions = new Map()
 
-    /** @type {Map<string, Map<boolean, Cache<import("../models/ns-maintenance").NsMaintenance[]>>>}*/
+    /** @type {Map<string, Map<boolean, Cache<import("../models/NsMaintenance").NsMaintenance[]>>>}*/
     #maintenance = new Map()
 
     /**

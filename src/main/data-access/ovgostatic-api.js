@@ -1,13 +1,10 @@
-/**
- * @fileoverview Class for OVgo static API requests.
- */
-
+/** @fileoverview Class for OVgo static API requests. */
 import axios from "axios"
 
 export class OVgoStaticAPI {
     /**
      * @throws {Error}
-     * @returns {Promise<import("../models/station.js").Station[]>}
+     * @returns {Promise<import("../models/Station").Station[]>}
      */
     static async getStations() {
         console.log("GET: stations (OVgo)")
