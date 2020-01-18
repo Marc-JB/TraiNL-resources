@@ -79,7 +79,7 @@ async function main(data) {
         const nsDepartures = await data.getDepartures(uicCode, language)
 
         if(isLegacyMode) {
-            const departures = nsDepartures.filter((_item, index) => index < 8).map(departure => mapDepartureLegacy(data, departure))
+            const departures = nsDepartures.filter((_item, index) => index < 8).map(departure => mapDepartureLegacy(data, departure, language))
             responseBuilder.setJsonBody(await Promise.all(departures))
         } else {
             const departures = nsDepartures.map(departure => transformNsDeparture(data, departure, language))
@@ -90,10 +90,11 @@ async function main(data) {
     })
 
     server.root.get("/api/v{v}/journeys/{id}.json", async (request) => {
+        const language = getLanguage(request)
         const journeyId = parseInt(request.url.params.get("id"))
         return new ResponseBuilder()
             .setCacheExpiration(60 * 5)
-            .setJsonBody(await transformNsTrainInfo(await data.getJourney(journeyId), id => searchStation(data, id)))
+            .setJsonBody(await transformNsTrainInfo(data, await data.getJourney(journeyId), null, language))
             .build()
     })
 

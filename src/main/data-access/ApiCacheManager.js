@@ -31,8 +31,8 @@ export class ApiCacheManager {
         this.#ovGoApi = ovGoApi
     }
 
-    async getStations() {
-        return await this.#stations.value
+    getStations() {
+        return this.#stations.value
     }
 
     /**
@@ -77,7 +77,7 @@ export class ApiCacheManager {
      * @param {boolean} actual
      * @param {"en" | "nl"} language
      */
-    async getMaintenance(actual = true, language) {
+    getMaintenance(actual = true, language) {
         if(!this.#maintenance.has(language)) {
             this.#maintenance.set(language, new Map())
         }
@@ -86,6 +86,6 @@ export class ApiCacheManager {
             this.#maintenance.get(language).set(actual, new Cache(60 * 5, () => this.#nsApi.getMaintenanceList(actual, language)))
         }
 
-        return await this.#maintenance.get(language).get(actual).value
+        return this.#maintenance.get(language).get(actual).value
     }
 }

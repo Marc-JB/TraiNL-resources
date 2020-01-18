@@ -10,14 +10,14 @@ export interface NsTrainSeats {
 }
 
 export interface NsTrainPart {
-    materieelnummer: number
+    materieelnummer?: number
     type: string
     faciliteiten: NsTrainFacility[]
-    afbeelding: string
-    breedte: number
-    hoogte: number
+    afbeelding?: string
+    breedte?: number
+    hoogte?: number
     zitplaatsen?: NsTrainSeats
-    eindbestemming: string
+    eindbestemming?: string
     bakken: {
         afbeelding: {
             url: string,
