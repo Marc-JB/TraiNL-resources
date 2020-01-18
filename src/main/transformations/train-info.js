@@ -40,7 +40,8 @@ export async function transformNsTrainInfo(it, stationLookUp, language = "en") {
 
             if (isQbuzzDMG) {
                 type = "Qbuzz GTW"
-                imageUrl = imageUrl && imageUrl.includes("8") ?  "https://marc-jb.github.io/OVgo-api/gtw_qbuzz_28.png" : "https://treinposities.nl/matimg/gtw_qbuzz_26.png"
+                if(!imageUrl)
+                    imageUrl = "https://marc-jb.github.io/OVgo-api/gtw_qbuzz_26.png"
             }
 
             const totalSeatsFirstClass = !part.zitplaatsen ? 0 : part.zitplaatsen.zitplaatsEersteKlas + part.zitplaatsen.klapstoelEersteKlas
