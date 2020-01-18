@@ -7,7 +7,15 @@ import { transformNsTrainInfo } from "./transformations/train-info.js"
 import { loadDeparturesLegacy } from "./disruptions-legacy.js"
 import { ApiCacheManager } from "./data-access/ApiCacheManager.js"
 import { mapDepartureLegacy } from "./transformations/departure-legacy.js"
-import { searchStations, searchStation } from "./searchStations.js"
+import { searchStations } from "./searchStations.js"
+
+/**
+ * @param {number} timeInMilliSeconds
+ * @returns {Promise<void>}
+ */
+function sleep(timeInMilliSeconds) {
+    return new Promise(resolve => setTimeout(resolve, timeInMilliSeconds))
+}
 
 function buildServer(){
     const serverBuilder = new WebServer.Builder()
@@ -79,7 +87,12 @@ async function main(data) {
         const nsDepartures = await data.getDepartures(uicCode, language)
 
         if(isLegacyMode) {
-            const departures = nsDepartures.filter((_item, index) => index < 8).map(departure => mapDepartureLegacy(data, departure, language))
+            const filteredNsDepartures = nsDepartures.filter((_item, index) => index < 10)
+            const departures = []
+            for(const departure of filteredNsDepartures) {
+                await sleep(75)
+                departures.push(await mapDepartureLegacy(data, departure, language))
+            }
             responseBuilder.setJsonBody(await Promise.all(departures))
         } else {
             const departures = nsDepartures.map(departure => transformNsDeparture(data, departure, language))
