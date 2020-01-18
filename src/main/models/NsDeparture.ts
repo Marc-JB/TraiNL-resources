@@ -1,3 +1,13 @@
+export interface NsProduct {
+    number: string
+    categoryCode: string
+    shortCategoryName: string
+    longCategoryName: string
+    operatorCode: string
+    operatorName: string
+    type: string
+}
+
 export interface NsDeparture {
     direction: string
     name: string
@@ -7,15 +17,7 @@ export interface NsDeparture {
     actualTimeZoneOffset: string
     actualTrack: string
     plannedTrack: string
-    product: {
-        number: string
-        categoryCode: string
-        shortCategoryName: string
-        longCategoryName: string
-        operatorCode: string
-        operatorName: string
-        type: string
-    }
+    product: NsProduct
     trainCategory: string
     cancelled: boolean
     routeStations: {

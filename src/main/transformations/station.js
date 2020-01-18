@@ -24,7 +24,7 @@ export function transformNsStation(it) {
 /**
  * @param {string} code
  * @param {string} language
- * @returns {{flag: string, name: string, code: string}}
+ * @returns { import("../models/Station").CountryInfo }
  */
 export function getCountryInfo(code, language = "en") {
     switch (code) {
