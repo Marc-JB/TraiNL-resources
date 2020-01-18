@@ -10,16 +10,16 @@ export class ApiCacheManager {
     /** @type {Cache<import("../models/station").Station[]>} */
     #stations = new Cache(60 * 60 * 24, () => this.#ovGoApi.getStations())
 
-    /** @type {Map<number, Map<string, Cache<import("../models/ns-departure").NsDeparture[]>>>} */
+    /** @type {Map<number, Map<string, Cache<import("../models/NsDeparture").NsDeparture[]>>>} */
     #departures = new Map()
 
-    /** @type {Map<number, Cache<import("../models/ns-traininfo").NsTrainInfo>>} */
+    /** @type {Map<number, Cache<import("../models/NsTrainInfo").NsTrainInfo>>} */
     #journeys = new Map()
 
-    /** @type {Map<string, Cache<import("../models/ns-disruption").NsDisruption[]>>} */
+    /** @type {Map<string, Cache<import("../models/NsDisruption").NsDisruption[]>>} */
     #disruptions = new Map()
 
-    /** @type {Map<string, Map<boolean, Cache<import("../models/ns-maintenance").NsMaintenance[]>>>}*/
+    /** @type {Map<string, Map<boolean, Cache<import("../models/NsMaintenance").NsMaintenance[]>>>}*/
     #maintenance = new Map()
 
     /**
@@ -31,8 +31,8 @@ export class ApiCacheManager {
         this.#ovGoApi = ovGoApi
     }
 
-    async getStations() {
-        return await this.#stations.value
+    getStations() {
+        return this.#stations.value
     }
 
     /**
@@ -77,7 +77,7 @@ export class ApiCacheManager {
      * @param {boolean} actual
      * @param {"en" | "nl"} language
      */
-    async getMaintenance(actual = true, language) {
+    getMaintenance(actual = true, language) {
         if(!this.#maintenance.has(language)) {
             this.#maintenance.set(language, new Map())
         }
@@ -86,6 +86,6 @@ export class ApiCacheManager {
             this.#maintenance.get(language).set(actual, new Cache(60 * 5, () => this.#nsApi.getMaintenanceList(actual, language)))
         }
 
-        return await this.#maintenance.get(language).get(actual).value
+        return this.#maintenance.get(language).get(actual).value
     }
 }

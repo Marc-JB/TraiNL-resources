@@ -1,6 +1,5 @@
 import moment from "moment"
 import { ResponseBuilder } from "./webserver.js"
-import { expire } from "./expire.js"
 
 /**
  * @param {import("@peregrine/webserver").Endpoint} endpoint
@@ -14,7 +13,7 @@ export function loadDeparturesLegacy(endpoint, data) {
 
         const actual = request.url.query.get("actual") === "false" ? false : true
 
-        /** @type {(import("./models/ns-disruption").NsDisruption | import("./models/ns-maintenance").NsMaintenance)[]} */
+        /** @type {(import("./models/NsDisruption").NsDisruption | import("./models/NsMaintenance").NsMaintenance)[]} */
         // @ts-ignore
         const disruptionList = (await Promise.all([data.getDisruptions(language), data.getMaintenance(actual, language)])).flat()
 
@@ -34,21 +33,21 @@ export function loadDeparturesLegacy(endpoint, data) {
                 endDate: it.endDate || null
             }))
 
-        const repsonseBuilder = new ResponseBuilder()
-        expire(repsonseBuilder, 60 * 2)
-        repsonseBuilder.setJsonBody(disruptions)
-        return repsonseBuilder.build()
+        return new ResponseBuilder()
+            .setCacheExpiration(60 * 2)
+            .setJsonBody(disruptions)
+            .build()
     })
 }
 
 /**
  * @deprecated
- * @param {import("./models/ns-disruption.js").NsDisruption | import("./models/ns-maintenance").NsMaintenance} disruption
+ * @param {import("./models/NsDisruption").NsDisruption | import("./models/NsMaintenance").NsMaintenance} disruption
  * @param {string} language
  */
 export function mapDisruptionLegacy(disruption, language) {
     if (disruption.type.startsWith("prio")) {
-        /** @type {import("./models/ns-disruption.js").NsDisruption} */
+        /** @type {import("./models/NsDisruption").NsDisruption} */
         // @ts-ignore
         const it = disruption
         return {
@@ -58,7 +57,7 @@ export function mapDisruptionLegacy(disruption, language) {
             description: it.melding.beschrijving
         }
     } else if (disruption.type === "werkzaamheid") {
-        /** @type {import("./models/ns-maintenance.js").NsMaintenance} */
+        /** @type {import("./models/NsMaintenance").NsMaintenance} */
         // @ts-ignore
         const it = disruption
         return {
@@ -73,7 +72,7 @@ export function mapDisruptionLegacy(disruption, language) {
             endDate: moment(it.verstoring.geldigheidsLijst[0].eindDatum)
         }
     } else if (disruption.type === "verstoring") {
-        /** @type {import("./models/ns-disruption.js").NsDisruption} */
+        /** @type {import("./models/NsDisruption").NsDisruption} */
         const it = disruption
         return {
             id: it.id,

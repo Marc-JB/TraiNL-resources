@@ -1,6 +1,6 @@
 /**
- * @param {import("../models/ns-station.js").NsStation} it
- * @returns {import("../models/station.js").Station}
+ * @param {import("../models/NsStation").NsStation} it
+ * @returns {import("../models/Station").Station}
  */
 export function transformNsStation(it) {
     return {
@@ -24,7 +24,7 @@ export function transformNsStation(it) {
 /**
  * @param {string} code
  * @param {string} language
- * @returns {{flag: string, name: string, code: string}}
+ * @returns { import("../models/Station").CountryInfo }
  */
 export function getCountryInfo(code, language = "en") {
     switch (code) {

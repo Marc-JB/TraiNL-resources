@@ -5,9 +5,9 @@ import { searchStation } from "../searchStations.js"
 /**
  * @throws {Error}
  * @param { import("../data-access/ApiCacheManager").ApiCacheManager } data
- * @param {import("../models/ns-departure.js").NsDeparture} departure
+ * @param {import("../models/NsDeparture").NsDeparture} departure
  * @param {"en" | "nl"} [language]
- * @returns {Promise<import("../models/departure.js").Departure>}
+ * @returns {Promise<import("../models/Departure").Departure>}
  */
 export async function transformNsDeparture(data, departure, language = "en") {
     const it = await fixNsDeparture(data, departure, language)
