@@ -6,9 +6,9 @@ import { fixNsTrainInfo } from "./fix-traininfo.js"
  * @deprecated
  * @param {number} journeyNumber
  * @param { import("../data-access/ApiCacheManager").ApiCacheManager } data
- * @param {import("../models/NsDeparture").NsDeparture} [departure]
+ * @param {import("../models/ns/NsDeparture").NsDeparture} [departure]
  * @param {"en" | "nl"} [language]
- * @returns { Promise<import("../models/LegacyTrainInfo").LegacyTrainInfo> }
+ * @returns { Promise<import("../models/legacy/LegacyTrainInfo").LegacyTrainInfo> }
  */
 export async function getTrainCompositionLegacy(journeyNumber, data, departure = null, language = "en") {
     const trainInfo = await fixNsTrainInfo(data, await data.getJourney(journeyNumber), departure, language)
@@ -31,9 +31,9 @@ export async function getTrainCompositionLegacy(journeyNumber, data, departure =
 /**
  * @deprecated
  * @param { import("../data-access/ApiCacheManager").ApiCacheManager } data
- * @param { import("../models/NsDeparture").NsDeparture } it
+ * @param { import("../models/ns/NsDeparture").NsDeparture } it
  * @param {"en" | "nl"} [language]
- * @returns { Promise<import("../models/LegacyDeparture").LegacyDeparture> }
+ * @returns { Promise<import("../models/legacy/LegacyDeparture").LegacyDeparture> }
  */
 export async function mapDepartureLegacy(data, it, language = "en") {
     const departure = await fixNsDeparture(data, it, language)

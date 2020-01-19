@@ -36,7 +36,7 @@ export class NsApi {
      * @throws {Error}
      * @param {"en" | "nl" | string} lang
      * @param {string} apiKey
-     * @returns {Promise<import("../models/NsDisruption").NsDisruption[]>}
+     * @returns {Promise<import("../models/ns/NsDisruption").NsDisruption[]>}
      */
     async getDisruptions(lang = null, apiKey = null){
         const api = NsApi._getApi("reisinformatie-api", apiKey || this.#apiKey, 2)
@@ -52,7 +52,7 @@ export class NsApi {
      * @param {boolean} actual
      * @param {"en" | "nl" | string} lang
      * @param {string} apiKey
-     * @returns {Promise<import("../models/NsMaintenance").NsMaintenance[]>}
+     * @returns {Promise<import("../models/ns/NsMaintenance").NsMaintenance[]>}
      */
     async getMaintenanceList(actual = true, lang = null, apiKey = null){
         const api = NsApi._getApi("reisinformatie-api", apiKey || this.#apiKey, 2)
@@ -68,7 +68,7 @@ export class NsApi {
      * @param {number} id
      * @param {"en" | "nl" | string} lang
      * @param {string} apiKey
-     * @returns {Promise<import("../models/NsDeparture").NsDeparture[]>}
+     * @returns {Promise<import("../models/ns/NsDeparture").NsDeparture[]>}
      */
     async getDepartures(id, lang = null, apiKey = null) {
         console.log(`GET: departures for ${id} (${lang || this.#lang})`)
@@ -88,7 +88,7 @@ export class NsApi {
     /**
      * @throws {Error}
      * @param {string} apiKey
-     * @returns {Promise<import("../models/NsStation").NsStation[]>}
+     * @returns {Promise<import("../models/ns/NsStation").NsStation[]>}
      */
     async getStations(apiKey = null){
         console.log("GET: stations (NS)")
@@ -104,7 +104,7 @@ export class NsApi {
      * @throws {Error}
      * @param {number} journeyNumber The journey number
      * @param {string} apiKey
-     * @returns {Promise<import("../models/NsTrainInfo").NsTrainInfo>}
+     * @returns {Promise<import("../models/ns/NsTrainInfo").NsTrainInfo>}
      */
     async getTrainInfo(journeyNumber, apiKey = null) {
         console.log(`GET: train info for ${journeyNumber}`)

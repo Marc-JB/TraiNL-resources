@@ -6,7 +6,7 @@ import { transformNsTrainInfo } from "./train-info.js"
 /**
  * @throws {Error}
  * @param { import("../data-access/ApiCacheManager").ApiCacheManager } data
- * @param {import("../models/NsDeparture").NsDeparture} departure
+ * @param {import("../models/ns/NsDeparture").NsDeparture} departure
  * @param {"en" | "nl"} [language]
  * @returns {Promise<import("../models/Departure").Departure>}
  */
