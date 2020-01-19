@@ -8,6 +8,7 @@ import { fixNsTrainInfo } from "./fix-traininfo.js"
  * @param { import("../data-access/ApiCacheManager").ApiCacheManager } data
  * @param {import("../models/NsDeparture").NsDeparture} [departure]
  * @param {"en" | "nl"} [language]
+ * @returns { Promise<import("../models/LegacyTrainInfo").LegacyTrainInfo> }
  */
 export async function getTrainCompositionLegacy(journeyNumber, data, departure = null, language = "en") {
     const trainInfo = await fixNsTrainInfo(data, await data.getJourney(journeyNumber), departure, language)
@@ -32,6 +33,7 @@ export async function getTrainCompositionLegacy(journeyNumber, data, departure =
  * @param { import("../data-access/ApiCacheManager").ApiCacheManager } data
  * @param { import("../models/NsDeparture").NsDeparture } it
  * @param {"en" | "nl"} [language]
+ * @returns { Promise<import("../models/LegacyDeparture").LegacyDeparture> }
  */
 export async function mapDepartureLegacy(data, it, language = "en") {
     const departure = await fixNsDeparture(data, it, language)
