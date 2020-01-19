@@ -1,6 +1,6 @@
 import { searchStation } from "../searchStations.js"
 
-/** @type {import("../models/NsTrainInfo").NsTrainFacility[]} */
+/** @type {import("../models/ns/NsTrainInfo").NsTrainFacility[]} */
 const qbuzzFacilities = ["FIETS"]
 
 const qbuzz2 = {
@@ -36,10 +36,10 @@ const qbuzz3 = {
 /**
  * @throws {Error}
  * @param {import("../data-access/ApiCacheManager").ApiCacheManager} data
- * @param {import("../models/NsTrainInfo").NsTrainInfo} it
- * @param {import("../models/NsDeparture").NsDeparture} [departure]
+ * @param {import("../models/ns/NsTrainInfo").NsTrainInfo} it
+ * @param {import("../models/ns/NsDeparture").NsDeparture} [departure]
  * @param {"en" | "nl"} [language]
- * @returns {Promise<import("../models/NsTrainInfo").NsTrainInfo>}
+ * @returns {Promise<import("../models/ns/NsTrainInfo").NsTrainInfo>}
  */
 export async function fixNsTrainInfo(data, it, departure = null, language = "en") {
     it.materieeldelen = it.materieeldelen || []

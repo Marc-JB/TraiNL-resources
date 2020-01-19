@@ -3,8 +3,8 @@ import { fixNsTrainInfo } from "./fix-traininfo.js"
 
 /**
  * @param {import("../data-access/ApiCacheManager").ApiCacheManager} data
- * @param {import("../models/NsTrainInfo").NsTrainInfo} trainInfo
- * @param {import("../models/NsDeparture").NsDeparture} [departure]
+ * @param {import("../models/ns/NsTrainInfo").NsTrainInfo} trainInfo
+ * @param {import("../models/ns/NsDeparture").NsDeparture} [departure]
  * @param {"en" | "nl"} [language]
  * @returns {Promise<import("../models/TrainInfo").TrainInfo>}
  */

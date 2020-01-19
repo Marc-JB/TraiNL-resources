@@ -1,5 +1,5 @@
 /**
- * @param {import("../models/NsStation").NsStation} it
+ * @param {import("../models/ns/NsStation").NsStation} it
  * @returns {import("../models/Station").Station}
  */
 export function transformNsStation(it) {

@@ -3,9 +3,9 @@ import { searchStation } from "../searchStations.js"
 /**
  * @throws {Error}
  * @param {import("../data-access/ApiCacheManager").ApiCacheManager} data
- * @param {import("../models/NsDeparture").NsDeparture} it
+ * @param {import("../models/ns/NsDeparture").NsDeparture} it
  * @param {"en" | "nl"} [language]
- * @returns {Promise<import("../models/NsDeparture").NsDeparture>}
+ * @returns {Promise<import("../models/ns/NsDeparture").NsDeparture>}
  */
 export async function fixNsDeparture(data, it, language = "en") {
     if (it.product.operatorName.toLowerCase() === "r-net") {
