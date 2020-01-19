@@ -12,7 +12,7 @@ export async function searchStations(data, q, onlyExactMatches = true, limit = 1
     const matchFunction = it => it.name.toLowerCase().includes(q.toLowerCase()) || it.code.toLowerCase().includes(q.toLowerCase()) || it.alternativeNames.some(it => it.toLowerCase().includes(q.toLowerCase()))
 
     /** @type {(it: import("./models/Station").Station) => boolean} */
-    const exactMatchFunction = it => it.name === q || it.code === q || it.alternativeNames.includes(q)
+    const exactMatchFunction = it => it.name.toLowerCase() === q.toLowerCase() || it.code.toLowerCase() === q.toLowerCase() || it.alternativeNames.map(it => it.toLowerCase()).includes(q.toLowerCase())
 
     return stations.filter(onlyExactMatches ? exactMatchFunction : matchFunction)
         .sort((a, b) =>

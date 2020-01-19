@@ -3,11 +3,10 @@ import { WebServer, ResponseBuilder } from "./webserver.js"
 import { OVgoStaticAPI } from "./data-access/ovgostatic-api.js"
 import { NsApi } from "./data-access/ns-api.js"
 import { transformNsDeparture } from "./transformations/departure.js"
-import { transformNsTrainInfo } from "./transformations/train-info.js"
 import { loadDeparturesLegacy } from "./disruptions-legacy.js"
 import { ApiCacheManager } from "./data-access/ApiCacheManager.js"
 import { mapDepartureLegacy } from "./transformations/departure-legacy.js"
-import { searchStations } from "./searchStations.js"
+import { searchStations, searchStation } from "./searchStations.js"
 
 /**
  * @param {number} timeInMilliSeconds
@@ -77,37 +76,22 @@ async function main(data) {
     server.root.get("api/v{v}/stations/{id}/departures.json", async (request) => {
         const language = getLanguage(request)
         const isLegacyMode = request.url.params.get("v") === "1"
-        const stationCode = request.url.params.get("id")
+        const stationId = request.url.params.get("id")
 
-        const uicCode = isNaN(parseInt(stationCode)) ? (await data.getStations()).find(it => it.code === stationCode.toUpperCase()).id : parseInt(stationCode)
+        const uicCode = isNaN(parseInt(stationId)) ? (await searchStation(data, stationId)).id : parseInt(stationId)
 
-        const responseBuilder = new ResponseBuilder()
-            .setCacheExpiration(90)
+        const nsDepartures = (await data.getDepartures(uicCode, language)).filter((_item, index) => index < 12)
 
-        const nsDepartures = await data.getDepartures(uicCode, language)
+        const departures = []
 
-        if(isLegacyMode) {
-            const filteredNsDepartures = nsDepartures.filter((_item, index) => index < 10)
-            const departures = []
-            for(const departure of filteredNsDepartures) {
-                await sleep(75)
-                departures.push(await mapDepartureLegacy(data, departure, language))
-            }
-            responseBuilder.setJsonBody(await Promise.all(departures))
-        } else {
-            const departures = nsDepartures.map(departure => transformNsDeparture(data, departure, language))
-            responseBuilder.setJsonBody(await Promise.all(departures))
+        for(const departure of nsDepartures) {
+            await sleep(75)
+            departures.push(await (isLegacyMode ? mapDepartureLegacy : transformNsDeparture)(data, departure, language))
         }
 
-        return responseBuilder.build()
-    })
-
-    server.root.get("/api/v{v}/journeys/{id}.json", async (request) => {
-        const language = getLanguage(request)
-        const journeyId = parseInt(request.url.params.get("id"))
         return new ResponseBuilder()
-            .setCacheExpiration(60 * 5)
-            .setJsonBody(await transformNsTrainInfo(data, await data.getJourney(journeyId), null, language))
+            .setCacheExpiration(90)
+            .setJsonBody(await Promise.all(departures))
             .build()
     })
 

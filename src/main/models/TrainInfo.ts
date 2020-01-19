@@ -16,7 +16,7 @@ export interface TrainPart {
     image: string
     seats: number
     seatsFirstClass: number
-    destinationStationId: number
+    destination: import("./Station").Station | null
 }
 
 export interface CrowdsForecast {
@@ -28,7 +28,7 @@ export interface CrowdsForecast {
 
 export interface TrainInfo {
     journeyId: number
-    stationId: number
+    station: import("./Station").Station
     type: string
     operator: string
     platform: string
@@ -38,4 +38,7 @@ export interface TrainInfo {
     plannedNumberOfCoaches: number
     length: number
     crowdsForecast: CrowdsForecast[]
+    facilities: TrainFacilities
+    seats: number
+    seatsFirstClass: number
 }

@@ -1,8 +1,8 @@
 export interface Departure {
     journeyId: number
-    directionStationId: number
-    actualDepartureTime: import("moment").Moment
-    plannedDepartureTime: import("moment").Moment
+    direction: import("./Station").Station
+    actualDepartureTime: Date
+    plannedDepartureTime: Date
     delayInSeconds: number
     actualPlatform: string
     plannedPlatform: string
@@ -10,8 +10,9 @@ export interface Departure {
     operator: string
     category: string
     cancelled: boolean
-    majorStopIds: number[]
+    majorStops: import("./Station").Station[]
     warnings: string[]
     info: string[]
-    departureStatus: "UNDERWAY" | "ARRIVED" | "DEPARTED"
+    departureStatus: "UNDERWAY" | "ARRIVED" | "DEPARTED",
+    trainComposition: import("./TrainInfo").TrainInfo
 }

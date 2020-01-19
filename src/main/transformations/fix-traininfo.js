@@ -42,8 +42,6 @@ const qbuzz3 = {
  * @returns {Promise<import("../models/NsTrainInfo").NsTrainInfo>}
  */
 export async function fixNsTrainInfo(data, it, departure = null, language = "en") {
-    console.log(it)
-
     it.materieeldelen = it.materieeldelen || []
     it.drukteVoorspelling = it.drukteVoorspelling || []
     it.ingekort = it.ingekort || false
