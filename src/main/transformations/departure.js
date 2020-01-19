@@ -35,7 +35,7 @@ export async function transformNsDeparture(data, departure, language = "en") {
     }
 
     return {
-        journeyId: parseInt(it.product.number),
+        id: parseInt(it.product.number),
         direction: await searchStation(data, it.direction),
         actualDepartureTime: actualDepartureTime,
         plannedDepartureTime: plannedDepartureTime,

@@ -41,7 +41,7 @@ export async function transformNsTrainInfo(data, trainInfo, departure = null, la
     }))
 
     return {
-        journeyId: it.ritnummer,
+        id: it.ritnummer,
         station: await searchStation(data, it.station),
         type: it.type,
         operator: it.vervoerder,

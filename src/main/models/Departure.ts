@@ -1,5 +1,5 @@
 export interface Departure {
-    journeyId: number
+    id: number
     direction: import("./Station").Station
     actualDepartureTime: Date
     plannedDepartureTime: Date
