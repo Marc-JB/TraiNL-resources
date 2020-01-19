@@ -3,7 +3,7 @@ import { WebServer, ResponseBuilder } from "./webserver.js"
 import { OVgoStaticAPI } from "./data-access/ovgostatic-api.js"
 import { NsApi } from "./data-access/ns-api.js"
 import { transformNsDeparture } from "./transformations/departure.js"
-import { loadDeparturesLegacy } from "./disruptions-legacy.js"
+import { loadDisruptionsLegacy } from "./disruptions-legacy.js"
 import { ApiCacheManager } from "./data-access/ApiCacheManager.js"
 import { mapDepartureLegacy } from "./transformations/departure-legacy.js"
 import { searchStations, searchStation } from "./searchStations.js"
@@ -46,7 +46,7 @@ async function main(data) {
             .build()
     }
 
-    loadDeparturesLegacy(server.root.createEndpointAtPath("api/v1"), data)
+    loadDisruptionsLegacy(server.root.createEndpointAtPath("api/v1"), data)
 
     server.root.get("/api/v{v}/stations.json", fetchStations)
 
