@@ -76,8 +76,7 @@ async function main(data) {
     server.root.get("api/v{v}/stations/{id}/departures.json", async (request) => {
         const language = getLanguage(request)
         const isLegacyMode = request.url.params.get("v") === "1"
-        // @ts-ignore
-        const stationId = request.url.params.get("id").replaceAll("%20", " ")
+        const stationId = request.url.params.get("id").replace("%20", " ")
 
         const uicCode = isNaN(parseInt(stationId)) ? (await searchStation(data, stationId)).id : parseInt(stationId)
 
