@@ -74,7 +74,7 @@ export async function fixNsTrainInfo(data, it, departure = null, language = "en"
             it.materieeldelen = [qbuzz2, qbuzz2]
         } else if(it.lengteInMeters < 105) {
             it.lengte = 5
-            it.materieeldelen = [qbuzz3, qbuzz2]
+            it.materieeldelen = [qbuzz2, qbuzz3]
         } else {
             it.lengte = 6
             it.materieeldelen = [qbuzz3, qbuzz3]
@@ -93,6 +93,9 @@ export async function fixNsTrainInfo(data, it, departure = null, language = "en"
             part.eindbestemming = (await searchStation(data, part.eindbestemming)).name
         else if(departure && departure.direction)
             part.eindbestemming = departure.direction
+
+        if(part.type && part.type.startsWith("Flirt") && it.vervoerder === "NS" && !part.faciliteiten.includes("TOEGANKELIJK"))
+            part.faciliteiten.push("TOEGANKELIJK")
 
         return part
     }))
