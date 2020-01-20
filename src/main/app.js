@@ -5,7 +5,6 @@ import { NsApi } from "./data-access/ns-api.js"
 import { transformNsDeparture } from "./transformations/departure.js"
 import { loadDisruptionsLegacy } from "./disruptions-legacy.js"
 import { ApiCacheManager } from "./data-access/ApiCacheManager.js"
-import { mapDepartureLegacy } from "./transformations/departure-legacy.js"
 import { searchStations, searchStation } from "./searchStations.js"
 
 /**
@@ -48,7 +47,7 @@ async function main(data) {
 
     loadDisruptionsLegacy(server.root.createEndpointAtPath("api/v1"), data)
 
-    server.root.get("/api/v{v}/stations.json", fetchStations)
+    server.root.get("/api/v0/stations.json", fetchStations)
 
     /**
      * @param {import("@peregrine/webserver").ReadonlyHttpRequest} request
@@ -61,7 +60,7 @@ async function main(data) {
         return primaryLanguage.split("-")[0]
     }
 
-    server.root.get("/api/v{v}/stations/{id}.json", async (request) => {
+    server.root.get("/api/v0/stations/{id}.json", async (request) => {
         const stationCode = parseInt(request.url.params.get("id"))
 
         const stations = await data.getStations()
@@ -73,9 +72,8 @@ async function main(data) {
             .build()
     })
 
-    server.root.get("api/v{v}/stations/{id}/departures.json", async (request) => {
+    server.root.get("api/v0/stations/{id}/departures.json", async (request) => {
         const language = getLanguage(request)
-        const isLegacyMode = request.url.params.get("v") === "1"
         const stationId = request.url.params.get("id").replace("%20", " ")
 
         const uicCode = isNaN(parseInt(stationId)) ? (await searchStation(data, stationId)).id : parseInt(stationId)
@@ -86,7 +84,7 @@ async function main(data) {
 
         for(const departure of nsDepartures) {
             await sleep(75)
-            departures.push(await (isLegacyMode ? mapDepartureLegacy : transformNsDeparture)(data, departure, language))
+            departures.push(await transformNsDeparture(data, departure, language))
         }
 
         return new ResponseBuilder()
