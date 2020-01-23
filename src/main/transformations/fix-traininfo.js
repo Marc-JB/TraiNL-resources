@@ -97,7 +97,7 @@ export async function fixNsTrainInfo(data, it, departure = null, language = "en"
         if(part.type && part.type.startsWith("Flirt") && it.vervoerder === "NS" && !part.faciliteiten.includes("TOEGANKELIJK"))
             part.faciliteiten.push("TOEGANKELIJK")
 
-        if(part.type && part.type.startsWith("SGM") && !part.faciliteiten.includes("TOILET"))
+        if(part.type && part.type.startsWith("SGM") && part.faciliteiten.includes("TOILET"))
             part.faciliteiten = part.faciliteiten.filter(it => it !== "TOILET")
 
         return part
