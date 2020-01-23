@@ -1,4 +1,5 @@
 import env from "./env.js"
+import { promises as afs } from "fs"
 import { WebServer, ResponseBuilder } from "./webserver.js"
 import { OVgoStaticAPI } from "./data-access/ovgostatic-api.js"
 import { NsApi } from "./data-access/ns-api.js"
@@ -15,17 +16,19 @@ function sleep(timeInMilliSeconds) {
     return new Promise(resolve => setTimeout(resolve, timeInMilliSeconds))
 }
 
-function buildServer(){
+async function buildServer(){
     const serverBuilder = new WebServer.Builder()
 
     if(env.PORT) serverBuilder.setPort(env.PORT)
 
-    if(env.CERT && env.KEY) {
-        serverBuilder.setKey(env.KEY).setCert(env.CERT)
-        if(env.CA) serverBuilder.setCA(env.CA)
+    if(env.DEV_MODE) {
+        serverBuilder
+            .enableDevelopmentMessages()
+            .setCert(await afs.open("../localhost.crt", "r"))
+            .setKey(await afs.open("../localhost.key", "r"))
     } else serverBuilder.useHttp1()
 
-    return serverBuilder.build()
+    return await serverBuilder.build()
 }
 
 /**
