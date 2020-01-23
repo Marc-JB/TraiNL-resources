@@ -4,7 +4,7 @@ import { searchStation } from "../searchStations.js"
 const qbuzzFacilities = ["FIETS"]
 
 const qbuzz2 = {
-    type: "GTW-EMU 2/6",
+    type: "GTW-E 2/6 Qbuzz",
     faciliteiten: qbuzzFacilities,
     afbeelding: "https://marc-jb.github.io/OVgo-api/gtw_qbuzz_26.png",
     zitplaatsen: {
@@ -19,7 +19,7 @@ const qbuzz2 = {
 }
 
 const qbuzz3 = {
-    type: "GTW-EMU 2/8",
+    type: "GTW-E 2/8 Qbuzz",
     faciliteiten: qbuzzFacilities,
     afbeelding: "https://marc-jb.github.io/OVgo-api/gtw_qbuzz_28.png",
     zitplaatsen: {
@@ -62,24 +62,7 @@ export async function fixNsTrainInfo(data, it, departure = null, language = "en"
 
     it.station = (await searchStation(data, it.station)).name
 
-    if(isQbuzzDMG) {
-        if (it.lengteInMeters < 49) {
-            it.lengte = 2
-            it.materieeldelen = [qbuzz2]
-        } else if(it.lengteInMeters < 69) {
-            it.lengte = 3
-            it.materieeldelen = [qbuzz3]
-        } else if(it.lengteInMeters < 90) {
-            it.lengte = 4
-            it.materieeldelen = [qbuzz2, qbuzz2]
-        } else if(it.lengteInMeters < 105) {
-            it.lengte = 5
-            it.materieeldelen = [qbuzz2, qbuzz3]
-        } else {
-            it.lengte = 6
-            it.materieeldelen = [qbuzz3, qbuzz3]
-        }
-    }
+    if(isQbuzzDMG) it.materieeldelen = it.materieeldelen.map(it => it.type.includes("8") ? qbuzz3 : qbuzz2)
 
     it.materieeldelen = await Promise.all(it.materieeldelen.map(async part => {
         part.faciliteiten = part.faciliteiten || []
