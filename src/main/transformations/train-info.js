@@ -42,7 +42,7 @@ export async function transformNsTrainInfo(data, trainInfo, departure = null, la
 
     return {
         id: it.ritnummer,
-        station: await searchStation(data, it.station),
+        station: it.station ? await searchStation(data, it.station) : null,
         type: it.type,
         operator: it.vervoerder,
         platform: it.spoor,
