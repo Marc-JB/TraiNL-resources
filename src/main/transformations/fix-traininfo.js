@@ -36,7 +36,7 @@ const qbuzz3 = {
 /**
  * @throws {Error}
  * @param {import("../data-access/ApiCacheManager").ApiCacheManager} data
- * @param {import("../models/ns/NsTrainInfo").NsTrainInfo} it
+ * @param {Partial<import("../models/ns/NsTrainInfo").NsTrainInfo>} it
  * @param {import("../models/ns/NsDeparture").NsDeparture} [departure]
  * @param {"en" | "nl"} [language]
  * @returns {Promise<import("../models/ns/NsTrainInfo").NsTrainInfo>}
@@ -87,6 +87,8 @@ export async function fixNsTrainInfo(data, it, departure = null, language = "en"
     }))
 
     it.geplandeLengte = it.geplandeLengte || it.lengte
+    it.bron = it.bron || "NS"
 
+    // @ts-ignore
     return it
 }

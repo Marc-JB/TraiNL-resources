@@ -13,7 +13,7 @@ export class ApiCacheManager {
     /** @type {Map<number, Map<string, Cache<import("../models/ns/NsDeparture").NsDeparture[]>>>} */
     #departures = new Map()
 
-    /** @type {Map<number, Cache<import("../models/ns/NsTrainInfo").NsTrainInfo>>} */
+    /** @type {Map<number, Cache<import("../models/ns/NsTrainInfo").NsTrainInfo | null>>} */
     #journeys = new Map()
 
     /** @type {Map<string, Cache<import("../models/ns/NsDisruption").NsDisruption[]>>} */

@@ -9,7 +9,7 @@ import { fixNsTrainInfo } from "./fix-traininfo.js"
  * @returns {Promise<import("../models/TrainInfo").TrainInfo>}
  */
 export async function transformNsTrainInfo(data, trainInfo, departure = null, language = "en") {
-    const it = await fixNsTrainInfo(data, trainInfo, departure, language)
+    const it = await fixNsTrainInfo(data, trainInfo || {}, departure, language)
 
     let seatCount = 0
     let seatCountFirstClass = 0

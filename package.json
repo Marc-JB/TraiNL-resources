@@ -23,6 +23,7 @@
     "moment": "^2.24.0"
   },
   "devDependencies": {
+    "@types/node": "^13.7.0",
     "chai": "^4.2.0",
     "esm": "^3.2.25",
     "mocha": "^7.0.0",
