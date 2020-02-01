@@ -104,7 +104,7 @@ export class NsApi {
      * @throws {Error}
      * @param {number} journeyNumber The journey number
      * @param {string} apiKey
-     * @returns {Promise<import("../models/ns/NsTrainInfo").NsTrainInfo>}
+     * @returns {Promise<import("../models/ns/NsTrainInfo").NsTrainInfo | null>}
      */
     async getTrainInfo(journeyNumber, apiKey = null) {
         console.log(`GET: train info for ${journeyNumber}`)
