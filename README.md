@@ -1,4 +1,4 @@
-# OVgo-api
+# OVgo-api [![Node CI](https://github.com/Marc-JB/OVgo-api/workflows/Node%20CI/badge.svg)](https://github.com/Marc-JB/OVgo-api/actions?query=workflow%3A%22Node+CI%22)
 A RESTful level 2 public transport API
 
 Also used in the [OVgo project](https://github.com/Marc-JB/OVgo)
