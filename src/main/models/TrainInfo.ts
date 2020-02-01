@@ -28,7 +28,7 @@ export interface CrowdsForecast {
 
 export interface TrainInfo {
     id: number
-    station: import("./Station").Station
+    station: import("./Station").Station | null
     type: string
     operator: string
     platform: string

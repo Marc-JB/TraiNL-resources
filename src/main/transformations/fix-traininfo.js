@@ -60,7 +60,7 @@ export async function fixNsTrainInfo(data, it, departure = null, language = "en"
         it.vervoerder = `DB/NS Internation${language === "en" ? "a" : "aa"}l`
     }
 
-    it.station = (await searchStation(data, it.station)).name
+    it.station = it.station ? (await searchStation(data, it.station)).name : it.station
 
     if(isQbuzzDMG) it.materieeldelen = it.materieeldelen.map(it => it.type.includes("8") ? qbuzz3 : qbuzz2)
 
