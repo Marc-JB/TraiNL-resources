@@ -110,9 +110,9 @@ export class NsApi {
         console.log(`GET: train info for ${journeyNumber}`)
         const api = NsApi._getApi("virtual-train-api", apiKey || this.#apiKey, 1)
         const result = await api.get(`trein/${journeyNumber}`, { params: { features: "zitplaats,platformitems,cta,drukte" } })
-        if(result.status >= 400 && result.status < 600)
+        if(result.status >= 400 && result.status < 600 && result.status !== 404)
             throw new Error(`Something went wrong. Got error code ${result.status}. Body: ${result.data}`)
 
-        return result.data
+        return result.status === 404 ? null : result.data
     }
 }
