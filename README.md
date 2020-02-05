@@ -13,10 +13,6 @@ This work is licensed under a [Creative Commons Attribution-NonCommercial-NoDeri
 * More unit tests
 * Add [JSON Schema](https://json-schema.org/) support
 
-## In progress
-* Rewrite code to improve architecture
-
 ## Implemented
 * ES2015/6 modules
 * Types using mixed JSDoc & TypeScript
-* ~~ESLint~~

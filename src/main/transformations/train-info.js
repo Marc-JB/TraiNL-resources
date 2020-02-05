@@ -9,15 +9,15 @@ import { fixNsTrainInfo } from "./fix-traininfo.js"
  * @returns {Promise<import("../models/TrainInfo").TrainInfo>}
  */
 export async function transformNsTrainInfo(data, trainInfo, departure = null, language = "en") {
-    const it = await fixNsTrainInfo(data, trainInfo || {}, departure, language)
+    const it = await fixNsTrainInfo(data, trainInfo ?? {}, departure, language)
 
     let seatCount = 0
     let seatCountFirstClass = 0
 
     const parts = await Promise.all(it.materieeldelen.map(async part => {
-        const totalSeatsFirstClass = !part.zitplaatsen ? 0 : part.zitplaatsen.zitplaatsEersteKlas + part.zitplaatsen.klapstoelEersteKlas
+        const totalSeatsFirstClass = (part.zitplaatsen?.zitplaatsEersteKlas ?? 0) + (part.zitplaatsen?.klapstoelEersteKlas ?? 0)
         seatCountFirstClass += totalSeatsFirstClass
-        const totalSeatsSecondClass = !part.zitplaatsen ? 0 : part.zitplaatsen.zitplaatsTweedeKlas + part.zitplaatsen.klapstoelTweedeKlas
+        const totalSeatsSecondClass = (part.zitplaatsen?.zitplaatsTweedeKlas ?? 0) + (part.zitplaatsen?.klapstoelTweedeKlas ?? 0)
         seatCount += totalSeatsSecondClass
 
         return {

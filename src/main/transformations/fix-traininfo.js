@@ -42,11 +42,11 @@ const qbuzz3 = {
  * @returns {Promise<import("../models/ns/NsTrainInfo").NsTrainInfo>}
  */
 export async function fixNsTrainInfo(data, it, departure = null, language = "en") {
-    it.materieeldelen = it.materieeldelen || []
-    it.drukteVoorspelling = it.drukteVoorspelling || []
-    it.ingekort = it.ingekort || false
+    it.materieeldelen = it.materieeldelen ?? []
+    it.drukteVoorspelling = it.drukteVoorspelling ?? []
+    it.ingekort = it.ingekort ?? false
 
-    const type = it.type ? it.type.toLowerCase() : ""
+    const type = it.type?.toLowerCase() ?? ""
     const isQbuzzDMG = it.vervoerder === "R-net" && !it.materieeldelen.some(it => it.type === "Flirt 2 TAG")
     const isEurostar = type === "eurostar"
 
@@ -60,12 +60,12 @@ export async function fixNsTrainInfo(data, it, departure = null, language = "en"
         it.vervoerder = `DB/NS Internation${language === "en" ? "a" : "aa"}l`
     }
 
-    it.station = it.station ? (await searchStation(data, it.station)).name : it.station
+    it.station = it.station ? (await searchStation(data, it.station))?.name ?? it.station : it.station
 
     if(isQbuzzDMG) it.materieeldelen = it.materieeldelen.map(it => it.type.includes("8") ? qbuzz3 : qbuzz2)
 
     it.materieeldelen = await Promise.all(it.materieeldelen.map(async part => {
-        part.faciliteiten = part.faciliteiten || []
+        part.faciliteiten = part.faciliteiten ?? []
 
         if (isEurostar && !!part.afbeelding) {
             part.afbeelding = "https://marc-jb.github.io/OVgo-api/eurostar_e320.png"
@@ -74,20 +74,20 @@ export async function fixNsTrainInfo(data, it, departure = null, language = "en"
 
         if(part.eindbestemming)
             part.eindbestemming = (await searchStation(data, part.eindbestemming)).name
-        else if(departure && departure.direction)
+        else if(departure?.direction)
             part.eindbestemming = departure.direction
 
-        if(part.type && part.type.startsWith("Flirt") && it.vervoerder === "NS" && !part.faciliteiten.includes("TOEGANKELIJK"))
+        if(part.type?.startsWith("Flirt") && it.vervoerder === "NS" && !part.faciliteiten.includes("TOEGANKELIJK"))
             part.faciliteiten.push("TOEGANKELIJK")
 
-        if(part.type && part.type.startsWith("SGM") && part.faciliteiten.includes("TOILET"))
+        if(part.type?.startsWith("SGM") && part.faciliteiten.includes("TOILET"))
             part.faciliteiten = part.faciliteiten.filter(it => it !== "TOILET")
 
         return part
     }))
 
-    it.geplandeLengte = it.geplandeLengte || it.lengte
-    it.bron = it.bron || "NS"
+    it.geplandeLengte = it.geplandeLengte ?? it.lengte
+    it.bron = it.bron ?? "NS"
 
     // @ts-ignore
     return it

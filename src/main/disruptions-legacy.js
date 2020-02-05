@@ -19,18 +19,18 @@ export function loadDisruptionsLegacy(endpoint, data) {
 
         const disruptions = disruptionList
             .map(it => mapDisruptionLegacy(it, language))
-            .filter(it => !!it && !!it.id && !!it.type && !!it.title)
+            .filter(it => !!it?.id && !!it?.type && !!it?.title)
             .map(it => ({
                 id: it.id,
                 type: it.type,
                 title: it.title,
-                description: it.description || "",
-                additionalTravelTime: it.additionalTravelTime || null,
-                cause: it.cause || null,
-                effect: it.effect || null,
-                expectations: it.expectations || null,
-                startDate: it.startDate || null,
-                endDate: it.endDate || null
+                description: it.description ?? "",
+                additionalTravelTime: it.additionalTravelTime ?? null,
+                cause: it.cause ?? null,
+                effect: it.effect ?? null,
+                expectations: it.expectations ?? null,
+                startDate: it.startDate ?? null,
+                endDate: it.endDate ?? null
             }))
 
         return new ResponseBuilder()
