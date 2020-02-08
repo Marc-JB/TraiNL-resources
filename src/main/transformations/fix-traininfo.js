@@ -6,7 +6,7 @@ const qbuzzFacilities = ["FIETS"]
 const qbuzz2 = {
     type: "GTW-E 2/6 Qbuzz",
     faciliteiten: qbuzzFacilities,
-    afbeelding: "https://marc-jb.github.io/OVgo-api/gtw_qbuzz_26.png",
+    afbeelding: "https://vt.ns-mlab.nl/v1/images/gtw_qbuzz_26.png",
     zitplaatsen: {
         staanplaatsEersteKlas: 0,
         staanplaatsTweedeKlas: 0,
@@ -21,7 +21,7 @@ const qbuzz2 = {
 const qbuzz3 = {
     type: "GTW-E 2/8 Qbuzz",
     faciliteiten: qbuzzFacilities,
-    afbeelding: "https://marc-jb.github.io/OVgo-api/gtw_qbuzz_28.png",
+    afbeelding: "https://vt.ns-mlab.nl/v1/images/gtw_qbuzz_28.png",
     zitplaatsen: {
         staanplaatsEersteKlas: 0,
         staanplaatsTweedeKlas: 0,
@@ -32,6 +32,13 @@ const qbuzz3 = {
     },
     bakken: []
 }
+
+const ovGoImages = [
+    "eurostar", "ice", "thalys",
+    "nsr_flirt_3", "nsr_flirt_4", "sgmm_2", "sgmm_3", "sng_3", "sng_4",
+    "gtw_qbuzz_26", "gtw_qbuzz_28",
+    "virm_4", "virm_6", "virmm1_4", "virmm1_6"
+]
 
 /**
  * @throws {Error}
@@ -66,10 +73,19 @@ export async function fixNsTrainInfo(data, it, departure = null, language = "en"
 
     it.materieeldelen = await Promise.all(it.materieeldelen.map(async part => {
         part.faciliteiten = part.faciliteiten ?? []
+        part.afbeelding = part.afbeelding || null
 
-        if (isEurostar && !!part.afbeelding) {
-            part.afbeelding = "https://marc-jb.github.io/OVgo-api/eurostar_e320.png"
+        if (isEurostar && part.afbeelding !== null) {
+            part.afbeelding = "https://vt.ns-mlab.nl/v1/images/eurostar.png"
             part.type = "Eurostar e320/Class 374"
+        }
+
+        if(part.afbeelding !== null) {
+            const images = part.afbeelding.split("/")
+            const image = images[images.length - 1].replace(".png", "")
+            if(ovGoImages.includes(image)) {
+                part.afbeelding = `https://marc-jb.github.io/OVgo-api/${image}.png`
+            }
         }
 
         if(part.eindbestemming)
