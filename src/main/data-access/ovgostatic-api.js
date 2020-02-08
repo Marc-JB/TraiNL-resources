@@ -10,7 +10,7 @@ export class OVgoStaticAPI {
         console.log("GET: stations (OVgo)")
         const api = axios.create({ baseURL: "https://Marc-JB.github.io/OVgo-api/" })
         try {
-            return (await api.get("stations.json")).data
+            return (await api.get("stations.json")).data ?? []
         } catch (error) {
             console.error(error)
             return []

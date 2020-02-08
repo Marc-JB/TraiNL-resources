@@ -39,14 +39,14 @@ export class NsApi {
      * @returns {Promise<import("../models/ns/NsDisruption").NsDisruption[]>}
      */
     async getDisruptions(lang = null, apiKey = null){
-        const api = NsApi._getApi("reisinformatie-api", apiKey || this.#apiKey, 2)
+        const api = NsApi._getApi("reisinformatie-api", apiKey ?? this.#apiKey, 2)
         try {
             return (await api.get("disruptions", {
                 params: {
                     type: "storing",
-                    lang: lang || this.#lang
+                    lang: lang ?? this.#lang
                 }
-            })).data.payload
+            })).data.payload ?? []
         } catch (error) {
             console.error(error)
             return []
@@ -61,15 +61,15 @@ export class NsApi {
      * @returns {Promise<import("../models/ns/NsMaintenance").NsMaintenance[]>}
      */
     async getMaintenanceList(actual = true, lang = null, apiKey = null){
-        const api = NsApi._getApi("reisinformatie-api", apiKey || this.#apiKey, 2)
+        const api = NsApi._getApi("reisinformatie-api", apiKey ?? this.#apiKey, 2)
         try {
             return (await api.get("disruptions", {
                 params: {
                     type: "werkzaamheid",
-                    lang: lang || this.#lang,
+                    lang: lang ?? this.#lang,
                     actual
                 }
-            })).data.payload
+            })).data.payload ?? []
         } catch (error) {
             console.error(error)
             return []
@@ -84,15 +84,15 @@ export class NsApi {
      * @returns {Promise<import("../models/ns/NsDeparture").NsDeparture[]>}
      */
     async getDepartures(id, lang = null, apiKey = null) {
-        console.log(`GET: departures for ${id} (${lang || this.#lang})`)
-        const api = NsApi._getApi("reisinformatie-api", apiKey || this.#apiKey, 2)
+        console.log(`GET: departures for ${id} (${lang ?? this.#lang})`)
+        const api = NsApi._getApi("reisinformatie-api", apiKey ?? this.#apiKey, 2)
         try {
             return (await api.get("departures", {
                 params: {
-                    lang: lang || this.#lang,
+                    lang: lang ?? this.#lang,
                     uicCode: `${id}`
                 }
-            })).data.payload.departures
+            })).data.payload.departures ?? []
         } catch (error) {
             console.error(error)
             return []
@@ -106,9 +106,9 @@ export class NsApi {
      */
     async getStations(apiKey = null){
         console.log("GET: stations (NS)")
-        const api = NsApi._getApi("reisinformatie-api", apiKey || this.#apiKey, 2)
+        const api = NsApi._getApi("reisinformatie-api", apiKey ?? this.#apiKey, 2)
         try {
-            return (await api.get("stations")).data.payload
+            return (await api.get("stations")).data.payload ?? []
         } catch (error) {
             console.error(error)
             return []
@@ -123,13 +123,13 @@ export class NsApi {
      */
     async getTrainInfo(journeyNumber, apiKey = null) {
         console.log(`GET: train info for ${journeyNumber}`)
-        const api = NsApi._getApi("virtual-train-api", apiKey || this.#apiKey, 1)
+        const api = NsApi._getApi("virtual-train-api", apiKey ?? this.#apiKey, 1)
         try {
             return (await api.get(`trein/${journeyNumber}`, {
                 params: {
                     features: "zitplaats,platformitems,cta,drukte"
                 }
-            })).data
+            })).data ?? null
         } catch (error) {
             console.error(error)
             return null

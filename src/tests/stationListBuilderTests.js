@@ -1,10 +1,10 @@
 import { getCountryInfo } from "../main/transformations/station.js"
-import { describe, it } from "mocha"
+import mocha from "mocha"
 import chai from "chai"
 
 chai.should()
 
-describe("Country Info tests", () => {
+mocha.describe("Country Info tests", () => {
     it("Country Info should throw error when country code is unknown", () => {
         getCountryInfo.bind("abcdef").should.throw(Error)
     })
