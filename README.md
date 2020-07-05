@@ -1,4 +1,5 @@
-# OVgo-api [![Node CI](https://github.com/Marc-JB/OVgo-api/workflows/Node%20CI/badge.svg)](https://github.com/Marc-JB/OVgo-api/actions?query=workflow%3A%22Node+CI%22)
+[![Node.js linter & tests](https://github.com/Marc-JB/OVgo-api/workflows/Node.js%20linter%20&%20tests/badge.svg)](https://github.com/Marc-JB/OVgo-api/actions)
+# OVgo-api
 A RESTful level 2 public transport API
 
 Also used in the [OVgo project](https://github.com/Marc-JB/OVgo)
@@ -11,8 +12,4 @@ This work is licensed under a [Creative Commons Attribution-NonCommercial-NoDeri
 ## To do
 * More endpoints
 * More unit tests
-* Add [JSON Schema](https://json-schema.org/) support
-
-## Implemented
-* ES2015/6 modules
-* Types using mixed JSDoc & TypeScript
+* Add [JSON Schema](https://json-schema.org/) support (?)
