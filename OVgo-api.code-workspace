@@ -5,7 +5,6 @@
 		}
 	],
 	"settings": {
-		"javascript.implicitProjectConfig.checkJs": true,
-		"typescript.tsdk": "node_modules\\typescript\\lib"
+		"editor.tabSize": 4
 	}
 }

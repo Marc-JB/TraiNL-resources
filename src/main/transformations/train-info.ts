@@ -1,14 +1,16 @@
-import { searchStation } from "../searchStations.js"
-import { fixNsTrainInfo } from "./fix-traininfo.js"
+import { searchStation } from "../searchStations"
+import { fixNsTrainInfo } from "./fix-traininfo"
+import { ApiCacheManager } from "../data-access/ApiCacheManager"
+import { NsTrainInfo } from "../models/ns/NsTrainInfo"
+import { NsDeparture } from "../models/ns/NsDeparture"
+import { TrainInfo, TrainPart } from "../models/TrainInfo"
 
-/**
- * @param {import("../data-access/ApiCacheManager").ApiCacheManager} data
- * @param {import("../models/ns/NsTrainInfo").NsTrainInfo} trainInfo
- * @param {import("../models/ns/NsDeparture").NsDeparture} [departure]
- * @param {"en" | "nl"} [language]
- * @returns {Promise<import("../models/TrainInfo").TrainInfo>}
- */
-export async function transformNsTrainInfo(data, trainInfo, departure = null, language = "en") {
+export async function transformNsTrainInfo(
+    data: ApiCacheManager,
+    trainInfo: NsTrainInfo | null,
+    departure: NsDeparture | null = null,
+    language: "en" | "nl" = "en"
+): Promise<TrainInfo> {
     const it = await fixNsTrainInfo(data, trainInfo ?? {}, departure, language)
 
     let seatCount = 0
@@ -37,7 +39,7 @@ export async function transformNsTrainInfo(data, trainInfo, departure = null, la
             seats: totalSeatsSecondClass,
             seatsFirstClass: totalSeatsFirstClass,
             destination: part.eindbestemming ? await searchStation(data, part.eindbestemming) : null
-        }
+        } as TrainPart
     }))
 
     return {
@@ -49,14 +51,14 @@ export async function transformNsTrainInfo(data, trainInfo, departure = null, la
         parts: parts,
         shortened: it.ingekort,
         actualNumberOfCoaches: it.lengte,
-        plannedNumberOfCoaches: it.geplandeLengte,
+        plannedNumberOfCoaches: it.geplandeLengte ?? it.lengte,
         length: it.lengteInMeters,
-        crowdsForecast: it.drukteVoorspelling.map(forecast => ({
+        crowdsForecast: it.drukteVoorspelling?.map(forecast => ({
             coach: forecast.coach,
             capacity: forecast.capacity,
             seats: forecast.seats,
             classification: forecast.classification === "UNKNOWN" ? null : forecast.classification
-        })),
+        })) ?? [],
         facilities: {
             toilet: parts.some(it => it.facilities.toilet),
             silenceCompartment: parts.some(it => it.facilities.silenceCompartment),

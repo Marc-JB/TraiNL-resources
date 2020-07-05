@@ -1,7 +1,9 @@
-import { searchStation } from "../searchStations.js"
+import { searchStation } from "../searchStations"
+import { NsTrainFacility, NsTrainInfo, NsTrainPart } from "../models/ns/NsTrainInfo"
+import { ApiCacheManager } from "../data-access/ApiCacheManager"
+import { NsDeparture } from "../models/ns/NsDeparture"
 
-/** @type {import("../models/ns/NsTrainInfo").NsTrainFacility[]} */
-const qbuzzFacilities = ["FIETS"]
+const qbuzzFacilities: NsTrainFacility[] = ["FIETS"]
 
 const qbuzz2 = {
     type: "GTW-E 2/6 Qbuzz",
@@ -33,15 +35,12 @@ const qbuzz3 = {
     bakken: []
 }
 
-/**
- * @throws {Error}
- * @param {import("../data-access/ApiCacheManager").ApiCacheManager} data
- * @param {Partial<import("../models/ns/NsTrainInfo").NsTrainInfo>} it
- * @param {import("../models/ns/NsDeparture").NsDeparture} [departure]
- * @param {"en" | "nl"} [language]
- * @returns {Promise<import("../models/ns/NsTrainInfo").NsTrainInfo>}
- */
-export async function fixNsTrainInfo(data, it, departure = null, language = "en") {
+export async function fixNsTrainInfo(
+    data: ApiCacheManager,
+    it: Partial<NsTrainInfo>,
+    departure: NsDeparture | null = null,
+    language: "en" | "nl" = "en"
+): Promise<NsTrainInfo> {
     it.materieeldelen = it.materieeldelen ?? []
     it.drukteVoorspelling = it.drukteVoorspelling ?? []
     it.ingekort = it.ingekort ?? false
@@ -52,19 +51,19 @@ export async function fixNsTrainInfo(data, it, departure = null, language = "en"
 
     if (it.vervoerder === "R-net") {
         it.vervoerder = `R-net ${language === "en" ? "by" : "door"} ${isQbuzzDMG ? "Qbuzz" : "NS"}`
-    } else if(isEurostar) {
+    } else if (isEurostar) {
         it.vervoerder = `Eurostar/NS Internation${language === "en" ? "a" : "aa"}l`
-    } else if(type === "tvg") {
+    } else if (type === "tvg") {
         it.vervoerder = `Thalys/NS Internation${language === "en" ? "a" : "aa"}l`
-    } else if(type === "ice") {
+    } else if (type === "ice") {
         it.vervoerder = `DB/NS Internation${language === "en" ? "a" : "aa"}l`
     }
 
     it.station = it.station ? (await searchStation(data, it.station))?.name ?? it.station : it.station
 
-    if(isQbuzzDMG) it.materieeldelen = it.materieeldelen.map(it => it.type.includes("8") ? qbuzz3 : qbuzz2)
+    if (isQbuzzDMG) it.materieeldelen = it.materieeldelen.map(it => it.type.includes("8") ? qbuzz3 : qbuzz2)
 
-    it.materieeldelen = await Promise.all(it.materieeldelen.map(async part => {
+    it.materieeldelen = await Promise.all(it.materieeldelen.map(async (part: Partial<NsTrainPart>) => {
         part.faciliteiten = part.faciliteiten ?? []
 
         if (isEurostar && !!part.afbeelding) {
@@ -72,23 +71,23 @@ export async function fixNsTrainInfo(data, it, departure = null, language = "en"
             part.type = "Eurostar e320/Class 374"
         }
 
-        if(part.eindbestemming)
-            part.eindbestemming = (await searchStation(data, part.eindbestemming)).name
-        else if(departure?.direction)
+        if (part.eindbestemming)
+            part.eindbestemming = (await searchStation(data, part.eindbestemming))?.name
+        else if (departure?.direction)
             part.eindbestemming = departure.direction
 
-        if(part.type?.startsWith("Flirt") && it.vervoerder === "NS" && !part.faciliteiten.includes("TOEGANKELIJK"))
+        if (part.type?.startsWith("Flirt") && it.vervoerder === "NS" && !part.faciliteiten.includes("TOEGANKELIJK"))
             part.faciliteiten.push("TOEGANKELIJK")
 
-        if(part.type?.startsWith("SGM") && part.faciliteiten.includes("TOILET"))
+        if (part.type?.startsWith("SGM") && part.faciliteiten.includes("TOILET"))
             part.faciliteiten = part.faciliteiten.filter(it => it !== "TOILET")
 
         return part
-    }))
+    })) as NsTrainPart[]
 
     it.geplandeLengte = it.geplandeLengte ?? it.lengte
     it.bron = it.bron ?? "NS"
 
-    // @ts-ignore
+    // @ts-expect-error
     return it
 }

@@ -1,12 +1,10 @@
 /** @fileoverview Class for OVgo static API requests. */
 import axios from "axios"
+import { Station } from "../models/Station"
 
-export class OVgoStaticAPI {
-    /**
-     * @throws {Error}
-     * @returns {Promise<import("../models/Station").Station[]>}
-     */
-    static async getStations() {
+// eslint-disable-next-line @typescript-eslint/naming-convention
+export const OVgoStaticAPI = {
+    getStations: async (): Promise<Station[]> => {
         console.log("GET: stations (OVgo)")
         const api = axios.create({ baseURL: "https://Marc-JB.github.io/OVgo-api/" })
         try {
