@@ -1,23 +1,22 @@
 import moment from "moment"
-import { fixNsDeparture } from "./fix-departure.js"
-import { searchStation } from "../searchStations.js"
-import { transformNsTrainInfo } from "./train-info.js"
+import { fixNsDeparture } from "./fix-departure"
+import { searchStation } from "../searchStations"
+import { transformNsTrainInfo } from "./train-info"
+import { Departure } from "../models/Departure"
+import { NsDeparture } from "../models/ns/NsDeparture"
+import { ApiCacheManager } from "../data-access/ApiCacheManager"
 
-/**
- * @throws {Error}
- * @param { import("../data-access/ApiCacheManager").ApiCacheManager } data
- * @param {import("../models/ns/NsDeparture").NsDeparture} departure
- * @param {"en" | "nl"} [language]
- * @returns {Promise<import("../models/Departure").Departure>}
- */
-export async function transformNsDeparture(data, departure, language = "en") {
+export async function transformNsDeparture(
+    data: ApiCacheManager,
+    departure: NsDeparture,
+    language: "en" | "nl" = "en"
+): Promise<Departure> {
     const it = await fixNsDeparture(data, departure, language)
 
     const plannedDepartureTime = moment(it.plannedDateTime).toDate()
     const actualDepartureTime = moment(it.actualDateTime).toDate()
 
-    /** @type {"UNDERWAY" | "ARRIVED" | "DEPARTED"} */
-    let departureStatus
+    let departureStatus: "UNDERWAY" | "ARRIVED" | "DEPARTED"
     switch (it.departureStatus) {
         case "INCOMING": {
             departureStatus = "UNDERWAY"
@@ -36,7 +35,7 @@ export async function transformNsDeparture(data, departure, language = "en") {
 
     return {
         id: parseInt(it.product.number),
-        direction: await searchStation(data, it.direction),
+        direction: (await searchStation(data, it.direction))!,
         actualDepartureTime: actualDepartureTime,
         plannedDepartureTime: plannedDepartureTime,
         delayInSeconds: Math.round((actualDepartureTime.getTime() - plannedDepartureTime.getTime()) / 1000),
@@ -46,9 +45,9 @@ export async function transformNsDeparture(data, departure, language = "en") {
         operator: it.product.operatorName,
         category: it.product.longCategoryName,
         cancelled: it.cancelled || false,
-        majorStops: await Promise.all(it.routeStations.map(async stop => (await data.getStations()).find(it => it.id === parseInt(stop.uicCode)))),
-        warnings: it.messages.filter(it => it.style === "WARNING").map(it => it.message),
-        info: it.messages.filter(it => it.style === "INFO").map(it => it.message),
+        majorStops: await Promise.all(it.routeStations.map(async stop => (await data.getStations()).find(it => it.id === parseInt(stop.uicCode))!)),
+        warnings: it.messages?.filter(it => it.style === "WARNING").map(it => it.message) ?? [],
+        info: it.messages?.filter(it => it.style === "INFO").map(it => it.message) ?? [],
         departureStatus,
         trainComposition: await transformNsTrainInfo(data, await data.getJourney(parseInt(it.product.number)), it, language)
     }

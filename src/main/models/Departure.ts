@@ -13,6 +13,6 @@ export interface Departure {
     majorStops: import("./Station").Station[]
     warnings: string[]
     info: string[]
-    departureStatus: "UNDERWAY" | "ARRIVED" | "DEPARTED",
+    departureStatus: "UNDERWAY" | "ARRIVED" | "DEPARTED"
     trainComposition: import("./TrainInfo").TrainInfo
 }

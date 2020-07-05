@@ -2,7 +2,7 @@ import { getCountryInfo } from "../main/transformations/station"
 import { suite, test, expect } from "@peregrine/test-with-decorators"
 
 @suite
-class CountryInfoTests {
+export class CountryInfoTests {
     @test
     public countryInfoShouldThrowErrorWhenCountryCodeIsUnknown(): void {
         expect(getCountryInfo.bind("abcdef")).to.throw(Error)

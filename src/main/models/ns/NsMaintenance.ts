@@ -7,13 +7,13 @@ export interface NsMaintenance {
         id: string
         extraReistijd: string
         reisadviezen: {
-            titel: string,
+            titel: string
             reisadvies: {
                 advies: string[]
             }[]
         }[]
         geldigheidsLijst: {
-            startDatum: string,
+            startDatum: string
             eindDatum: string
         }[]
         gevolg: string
@@ -24,9 +24,9 @@ export interface NsMaintenance {
         header: string
         periode: string
         trajecten: {
-            stations: string[],
-            begintijd: string,
-            eindtijd: string,
+            stations: string[]
+            begintijd: string
+            eindtijd: string
             richting: "HEEN" | "HEEN_EN_TERUG"
         }[]
         prioriteit: number

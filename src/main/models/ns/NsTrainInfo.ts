@@ -20,8 +20,8 @@ export interface NsTrainPart {
     eindbestemming?: string
     bakken: {
         afbeelding: {
-            url: string,
-            breedte: number,
+            url: string
+            breedte: number
             hoogte: number
         }
     }[]

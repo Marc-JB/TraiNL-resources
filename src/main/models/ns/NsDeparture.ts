@@ -21,11 +21,11 @@ export interface NsDeparture {
     trainCategory: string
     cancelled: boolean
     routeStations: {
-        uicCode: string,
+        uicCode: string
         mediumName: string
     }[]
     messages?: {
-        message: string,
+        message: string
         style: "INFO" | "WARNING"
     }[]
     departureStatus: "INCOMING" | "ON_STATION" | "DEPARTED"

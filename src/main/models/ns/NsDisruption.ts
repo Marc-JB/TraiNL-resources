@@ -13,8 +13,8 @@ export interface NsDisruption {
         volgendeUpdate: string
         bodyItems: any[]
         buttons: {
-            titel: string,
-            type: "planner" | "werkzaamheden",
+            titel: string
+            type: "planner" | "werkzaamheden"
             voorleesTitel: string
         }[]
     }
@@ -22,7 +22,7 @@ export interface NsDisruption {
         type: "STORING" | string
         id: string
         geldigheidsLijst: {
-            startDatum: string,
+            startDatum: string
             eindDatum: string
         }[]
         verwachting: string
@@ -38,9 +38,9 @@ export interface NsDisruption {
             stations: string[]
         }[]
         trajecten: {
-            stations: string[],
-            begintijd: string,
-            eindtijd: string,
+            stations: string[]
+            begintijd: string
+            eindtijd: string
             richting: "HEEN" | "HEEN_EN_TERUG"
         }[]
         versie: string

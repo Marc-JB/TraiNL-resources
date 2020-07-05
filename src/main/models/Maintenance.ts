@@ -1,25 +1,25 @@
 export interface Maintenance {
-    titel: string,
-    startDate: import("moment").Moment,
-    endDate: import("moment").Moment,
+    titel: string
+    startDate: import("moment").Moment
+    endDate: import("moment").Moment
     trajects: {
-        stations: number[],
-        startDate: import("moment").Moment,
-        endDate: import("moment").Moment,
+        stations: number[]
+        startDate: import("moment").Moment
+        endDate: import("moment").Moment
         bothDirections: boolean
-    }[],
-    travelAdviceShort: string,
-    travelAdviceDetailed: string,
+    }[]
+    travelAdviceShort: string
+    travelAdviceDetailed: string
     verstoring?: {
         extraReistijd: string
         reisadviezen: {
-            titel: string,
+            titel: string
             reisadvies: {
                 advies: string[]
             }[]
         }[]
         geldigheidsLijst: {
-            startDatum: string,
+            startDatum: string
             eindDatum: string
         }[]
         gevolg: string
@@ -30,9 +30,9 @@ export interface Maintenance {
         header: string
         periode: string
         trajecten: {
-            stations: string[],
-            begintijd: string,
-            eindtijd: string,
+            stations: string[]
+            begintijd: string
+            eindtijd: string
             richting: "HEEN" | "HEEN_EN_TERUG"
         }[]
         prioriteit: number

@@ -1,8 +1,7 @@
-/**
- * @param {import("../models/ns/NsStation").NsStation} it
- * @returns {import("../models/Station").Station}
- */
-export function transformNsStation(it) {
+import { NsStation } from "../models/ns/NsStation"
+import { Station, CountryInfo } from "../models/Station"
+
+export function transformNsStation(it: NsStation): Station {
     return {
         id: parseInt(it.UICCode),
         code: it.code,
@@ -21,12 +20,7 @@ export function transformNsStation(it) {
     }
 }
 
-/**
- * @param {string} code
- * @param {string} language
- * @returns { import("../models/Station").CountryInfo }
- */
-export function getCountryInfo(code, language = "en") {
+export function getCountryInfo(code: string, language: "en" | "nl" | string = "en"): CountryInfo {
     switch (code) {
         case "NL": return {
             flag: "🇳🇱",
@@ -67,13 +61,7 @@ export function getCountryInfo(code, language = "en") {
     }
 }
 
-/**
- * @param {string[]} originalSynonyms
- * @param {string} longName
- * @param {string} mediumName
- * @returns {string[]}
- */
-function buildSynonymList(originalSynonyms, longName, mediumName) {
+function buildSynonymList(originalSynonyms: string[], longName: string, mediumName: string): string[] {
     originalSynonyms.push(longName)
 
     // Add mediumName as synonym if it has the city name removed (like Amsterdam RAI (full) -> RAI (medium))
@@ -88,7 +76,7 @@ function buildSynonymList(originalSynonyms, longName, mediumName) {
         originalSynonyms.push(it.replace(" Centraal", "").replace(" Centrum", "").replace(" Hbf", ""))
     })
 
-    const specialCharacters = { "ü": "u", "ö": "o", "ä": "a", "â": "a" }
+    const specialCharacters: { [key: string]: string } = { "ü": "u", "ö": "o", "ä": "a", "â": "a" }
 
     return [...new Set(originalSynonyms)] // Remove duplicates
         // Remove duplicates that have special characters simplified (like München -> Munchen)
