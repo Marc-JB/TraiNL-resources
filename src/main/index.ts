@@ -2,10 +2,10 @@ import { createRouter } from "@peregrine/koa-with-decorators"
 import dotenv from "dotenv"
 import Koa, { Context, Next } from "koa"
 import bodyParser from "koa-bodyparser"
-// import { loadDisruptionsLegacy } from "./disruptions-legacy"
 import { ApiCacheManager } from "./data-access/ApiCacheManager"
 import { NsApi } from "./data-access/ns-api"
 import { OVgoStaticAPI } from "./data-access/ovgostatic-api"
+import { LegacyDisruptionsAPI } from "./LegacyDisruptionsAPI"
 import { StationsAPI } from "./StationsAPI"
 
 if (process.env.NS_API_KEY === undefined) dotenv.config()
@@ -25,11 +25,12 @@ async function main(data: ApiCacheManager): Promise<void> {
     koaApp.use(bodyParser())
 
     const stationsRoute = createRouter(StationsAPI, new StationsAPI(data))
-
     koaApp.use(stationsRoute.routes())
     koaApp.use(stationsRoute.allowedMethods())
 
-    // TODO: loadDisruptionsLegacy
+    const legacyDisruptionsRoute = createRouter(LegacyDisruptionsAPI, new LegacyDisruptionsAPI(data))
+    koaApp.use(legacyDisruptionsRoute.routes())
+    koaApp.use(legacyDisruptionsRoute.allowedMethods())
 
     // Remove default response body, catch all errors.
     koaApp.use(async (ctx: Context, next: Next) => {
