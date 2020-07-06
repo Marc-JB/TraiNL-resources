@@ -1,13 +1,13 @@
 import moment from "moment"
 import { fixNsDeparture } from "./fix-departure"
-import { searchStation } from "../searchStations"
+import { searchStation } from "../../searchStations"
 import { transformNsTrainInfo } from "./train-info"
-import { Departure } from "../models/Departure"
-import { NsDeparture } from "../models/ns/NsDeparture"
-import { ApiCacheManager } from "../data-access/ApiCacheManager"
+import { Departure } from "../../models/Departure"
+import { NsDeparture } from "../../models/ns/NsDeparture"
+import { DataRepository } from "../Repositories"
 
 export async function transformNsDeparture(
-    data: ApiCacheManager,
+    data: DataRepository,
     departure: NsDeparture,
     language: "en" | "nl" = "en"
 ): Promise<Departure> {

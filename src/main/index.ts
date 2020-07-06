@@ -5,8 +5,8 @@ import bodyParser from "koa-bodyparser"
 import { ApiCacheManager } from "./data-access/ApiCacheManager"
 import { NsApi } from "./data-access/ns-api"
 import { OVgoStaticAPI } from "./data-access/ovgostatic-api"
-import { LegacyDisruptionsAPI } from "./LegacyDisruptionsAPI"
-import { StationsAPI } from "./StationsAPI"
+import { DisruptionsControllerLegacy } from "./controllers/DisruptionsControllerLegacy"
+import { StationsController } from "./controllers/StationsController"
 
 if (process.env.NS_API_KEY === undefined) dotenv.config()
 
@@ -20,15 +20,17 @@ async function promisify<R>(func: (cb: (err?: Error) => void) => R): Promise<R> 
     })
 }
 
-async function main(data: ApiCacheManager): Promise<void> {
+async function main(): Promise<void> {
+    const data = new ApiCacheManager(new NsApi(undefined, process.env.NS_API_KEY), OVgoStaticAPI)
+
     const koaApp = new Koa()
     koaApp.use(bodyParser())
 
-    const stationsRoute = createRouter(StationsAPI, new StationsAPI(data))
+    const stationsRoute = createRouter(StationsController, new StationsController(data))
     koaApp.use(stationsRoute.routes())
     koaApp.use(stationsRoute.allowedMethods())
 
-    const legacyDisruptionsRoute = createRouter(LegacyDisruptionsAPI, new LegacyDisruptionsAPI(data))
+    const legacyDisruptionsRoute = createRouter(DisruptionsControllerLegacy, new DisruptionsControllerLegacy(data))
     koaApp.use(legacyDisruptionsRoute.routes())
     koaApp.use(legacyDisruptionsRoute.allowedMethods())
 
@@ -53,4 +55,4 @@ async function main(data: ApiCacheManager): Promise<void> {
     console.log(`Server is running on port ${port}`)
 }
 
-main(new ApiCacheManager(new NsApi(undefined, process.env.NS_API_KEY), OVgoStaticAPI)).catch(console.error)
+main().catch(console.error)

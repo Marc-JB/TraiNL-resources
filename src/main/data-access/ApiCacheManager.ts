@@ -6,8 +6,9 @@ import { NsDeparture } from "../models/ns/NsDeparture"
 import { NsTrainInfo } from "../models/ns/NsTrainInfo"
 import { NsDisruption } from "../models/ns/NsDisruption"
 import { NsMaintenance } from "../models/ns/NsMaintenance"
+import { DataRepository } from "./Repositories"
 
-export class ApiCacheManager {
+export class ApiCacheManager implements DataRepository {
     private readonly stations: Cache<Station[]>
 
     private readonly departures = new Map<number, Map<string, Cache<NsDeparture[]>>>()

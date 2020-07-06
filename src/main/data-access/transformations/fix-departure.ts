@@ -1,9 +1,9 @@
-import { searchStation } from "../searchStations"
-import { NsDeparture } from "../models/ns/NsDeparture"
-import { ApiCacheManager } from "../data-access/ApiCacheManager"
+import { searchStation } from "../../searchStations"
+import { NsDeparture } from "../../models/ns/NsDeparture"
+import { DataRepository } from "../Repositories"
 
 export async function fixNsDeparture(
-    data: ApiCacheManager,
+    data: DataRepository,
     it: Partial<NsDeparture>,
     language: "en" | "nl" = "en"
 ): Promise<NsDeparture> {

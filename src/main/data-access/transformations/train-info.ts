@@ -1,12 +1,12 @@
-import { searchStation } from "../searchStations"
+import { searchStation } from "../../searchStations"
 import { fixNsTrainInfo } from "./fix-traininfo"
-import { ApiCacheManager } from "../data-access/ApiCacheManager"
-import { NsTrainInfo } from "../models/ns/NsTrainInfo"
-import { NsDeparture } from "../models/ns/NsDeparture"
-import { TrainInfo, TrainPart } from "../models/TrainInfo"
+import { NsTrainInfo } from "../../models/ns/NsTrainInfo"
+import { NsDeparture } from "../../models/ns/NsDeparture"
+import { TrainInfo, TrainPart } from "../../models/TrainInfo"
+import { DataRepository } from "../Repositories"
 
 export async function transformNsTrainInfo(
-    data: ApiCacheManager,
+    data: DataRepository,
     trainInfo: NsTrainInfo | null,
     departure: NsDeparture | null = null,
     language: "en" | "nl" = "en"

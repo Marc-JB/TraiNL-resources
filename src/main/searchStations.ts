@@ -1,8 +1,8 @@
-import { ApiCacheManager } from "./data-access/ApiCacheManager"
 import { Station } from "./models/Station"
+import { DataRepository } from "./data-access/Repositories"
 
 export async function searchStations(
-    data: ApiCacheManager,
+    data: DataRepository,
     q: string,
     onlyExactMatches: boolean = true,
     limit: number = 10
@@ -22,6 +22,6 @@ export async function searchStations(
         ).slice(0, limit)
 }
 
-export async function searchStation(data: ApiCacheManager, q: string): Promise<Station | null> {
+export async function searchStation(data: DataRepository, q: string): Promise<Station | null> {
     return (await searchStations(data, q))[0]
 }

@@ -1,21 +1,21 @@
 import { ApiController, HttpGet, Path } from "@peregrine/koa-with-decorators"
 import { Context } from "koa"
 import moment from "moment"
-import { ApiCacheManager } from "./data-access/ApiCacheManager"
-import { NsDisruption } from "./models/ns/NsDisruption"
-import { NsMaintenance } from "./models/ns/NsMaintenance"
+import { NsDisruption } from "../models/ns/NsDisruption"
+import { NsMaintenance } from "../models/ns/NsMaintenance"
+import { DataRepository } from "../data-access/Repositories"
+import { setCacheExpirationTime, getLanguage } from "./Utils"
 
 @ApiController("/api/v1")
-export class LegacyDisruptionsAPI {
-    public constructor(private readonly data: ApiCacheManager) {}
+export class DisruptionsControllerLegacy {
+    public constructor(private readonly data: DataRepository) {}
 
     @HttpGet
     @Path("/disruptions.json")
-    public async getDisruptions(ctx: Context): Promise<void> {
-        // TODO: cache time of 60 * 2
-        const language = "en"
+    public async getDisruptions({ request, response }: Context): Promise<void> {
+        const language = getLanguage(request)
 
-        const actual = ctx.query.actual !== "false"
+        const actual = request.query.actual !== "false"
 
         const disruptionList: (NsDisruption | NsMaintenance)[] = (await Promise.all([
             this.data.getDisruptions(language),
@@ -38,8 +38,9 @@ export class LegacyDisruptionsAPI {
                 endDate: it.endDate ?? null
             }))
 
-        ctx.response.status = 200
-        ctx.response.body = disruptions
+        response.status = 200
+        response.body = disruptions
+        setCacheExpirationTime(response, 60 * 2)
     }
 }
 
