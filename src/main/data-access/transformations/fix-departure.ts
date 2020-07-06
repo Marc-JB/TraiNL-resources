@@ -1,6 +1,6 @@
-import { searchStation } from "../searchStations"
-import { NsDeparture } from "../models/ns/NsDeparture"
-import { DataRepository } from "../data-access/Repositories"
+import { searchStation } from "../../searchStations"
+import { NsDeparture } from "../../models/ns/NsDeparture"
+import { DataRepository } from "../Repositories"
 
 export async function fixNsDeparture(
     data: DataRepository,

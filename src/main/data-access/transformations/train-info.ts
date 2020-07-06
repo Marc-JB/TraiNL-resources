@@ -1,9 +1,9 @@
-import { searchStation } from "../searchStations"
+import { searchStation } from "../../searchStations"
 import { fixNsTrainInfo } from "./fix-traininfo"
-import { NsTrainInfo } from "../models/ns/NsTrainInfo"
-import { NsDeparture } from "../models/ns/NsDeparture"
-import { TrainInfo, TrainPart } from "../models/TrainInfo"
-import { DataRepository } from "../data-access/Repositories"
+import { NsTrainInfo } from "../../models/ns/NsTrainInfo"
+import { NsDeparture } from "../../models/ns/NsDeparture"
+import { TrainInfo, TrainPart } from "../../models/TrainInfo"
+import { DataRepository } from "../Repositories"
 
 export async function transformNsTrainInfo(
     data: DataRepository,

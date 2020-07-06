@@ -1,5 +1,5 @@
-import { NsStation } from "../models/ns/NsStation"
-import { Station, CountryInfo } from "../models/Station"
+import { NsStation } from "../../models/ns/NsStation"
+import { Station, CountryInfo } from "../../models/Station"
 
 export function transformNsStation(it: NsStation): Station {
     return {

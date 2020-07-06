@@ -1,7 +1,7 @@
 import { ApiController, HttpGet, Path } from "@peregrine/koa-with-decorators"
 import { Context } from "koa"
 import { searchStation, searchStations } from "../searchStations"
-import { transformNsDeparture } from "../transformations/departure"
+import { transformNsDeparture } from "../data-access/transformations/departure"
 import { DataRepository } from "../data-access/Repositories"
 
 async function sleep(timeInMilliSeconds: number): Promise<void> {

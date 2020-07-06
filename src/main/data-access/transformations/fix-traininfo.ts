@@ -1,7 +1,7 @@
-import { searchStation } from "../searchStations"
-import { NsTrainFacility, NsTrainInfo, NsTrainPart } from "../models/ns/NsTrainInfo"
-import { NsDeparture } from "../models/ns/NsDeparture"
-import { DataRepository } from "../data-access/Repositories"
+import { searchStation } from "../../searchStations"
+import { NsTrainFacility, NsTrainInfo, NsTrainPart } from "../../models/ns/NsTrainInfo"
+import { NsDeparture } from "../../models/ns/NsDeparture"
+import { DataRepository } from "../Repositories"
 
 const qbuzzFacilities: NsTrainFacility[] = ["FIETS"]
 
