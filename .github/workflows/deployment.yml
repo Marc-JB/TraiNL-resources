@@ -1,0 +1,30 @@
+name: Deployment
+
+on:
+  push:
+    branches: [ main, dev ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+
+      # Checkout
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      # Deploy to GitHub Pages
+      - name: Copy README, CNAME, etc.
+        run: |
+          sudo cp ./CNAME ./docs/CNAME || echo "No CNAME"
+          sudo cp ./README.md ./docs/README.md || echo "No README.md"
+          sudo cp ./LICENSE ./docs/LICENSE || echo "No LICENSE"
+
+      - name: Deploy to GitHub Pages
+        if: success()
+        uses: crazy-max/ghaction-github-pages@v2
+        with:
+          target_branch: gh-pages
+          build_dir: ./docs/
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
