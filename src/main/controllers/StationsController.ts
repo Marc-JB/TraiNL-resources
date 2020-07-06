@@ -3,14 +3,7 @@ import { Context } from "koa"
 import { searchStation, searchStations } from "../searchStations"
 import { transformNsDeparture } from "../data-access/transformations/departure"
 import { DataRepository } from "../data-access/Repositories"
-
-async function sleep(timeInMilliSeconds: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, timeInMilliSeconds))
-}
-
-function getLanguage(_: Context): "en" | "nl" {
-    return "nl"
-}
+import { setCacheTime, getLanguage, sleep } from "./Utils"
 
 @ApiController("/api/v0")
 export class StationsController {
@@ -18,32 +11,32 @@ export class StationsController {
 
     @HttpGet
     @Path("/stations.json")
-    public async getAllStations(ctx: Context): Promise<void> {
-        // TODO: cache time of 60 * 60 * 24 * 5
-        const { q = null } = ctx.query
-        ctx.response.status = 200
-        ctx.response.body = q !== null && typeof q === "string" ? await searchStations(this.data, q, false) : await this.data.getStations()
+    public async getAllStations({ request, response }: Context): Promise<void> {
+        const { q = null } = request.query
+        response.status = 200
+        const hasQueryString = q !== null && typeof q === "string"
+        response.body = hasQueryString ? await searchStations(this.data, q, false) : await this.data.getStations()
+        setCacheTime(response, 60 * 60 * 24 * 5)
     }
 
     @HttpGet
     @Path("/stations/:id.json")
-    public async getStationById(ctx: Context): Promise<void> {
-        // TODO: cache time of 90
-        const stationCode = parseInt(ctx.params.id)
+    public async getStationById({ params, response }: Context): Promise<void> {
+        const stationCode = parseInt(params.id)
 
         const stations = await this.data.getStations()
         const station = stations.find(it => it.id === stationCode) ?? null
 
-        ctx.response.status = station === null ? 404 : 200
-        if (station !== null) ctx.response.body = station
+        response.status = station === null ? 404 : 200
+        if (station !== null) response.body = station
+        setCacheTime(response, 90)
     }
 
     @HttpGet
     @Path("/stations/:id/departures.json")
-    public async getDeparturesForStationById(ctx: Context): Promise<void> {
-        // TODO: cache time of 90
-        const language = getLanguage(ctx)
-        const stationId = ctx.params.id.replace("%20", " ")
+    public async getDeparturesForStationById({ request, params, response }: Context): Promise<void> {
+        const language = getLanguage(request)
+        const stationId = params.id.replace("%20", " ")
 
         const uicCode = isNaN(parseInt(stationId)) ? (await searchStation(this.data, stationId))!.id : parseInt(stationId)
 
@@ -56,7 +49,8 @@ export class StationsController {
             departures.push(await transformNsDeparture(this.data, departure, language))
         }
 
-        ctx.response.status = 200
-        ctx.response.body = await Promise.all(departures)
+        response.status = 200
+        response.body = await Promise.all(departures)
+        setCacheTime(response, 90)
     }
 }

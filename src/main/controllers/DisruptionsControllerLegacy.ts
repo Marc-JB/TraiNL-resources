@@ -4,6 +4,7 @@ import moment from "moment"
 import { NsDisruption } from "../models/ns/NsDisruption"
 import { NsMaintenance } from "../models/ns/NsMaintenance"
 import { DataRepository } from "../data-access/Repositories"
+import { setCacheTime, getLanguage } from "./Utils"
 
 @ApiController("/api/v1")
 export class DisruptionsControllerLegacy {
@@ -11,11 +12,10 @@ export class DisruptionsControllerLegacy {
 
     @HttpGet
     @Path("/disruptions.json")
-    public async getDisruptions(ctx: Context): Promise<void> {
-        // TODO: cache time of 60 * 2
-        const language = "en"
+    public async getDisruptions({ request, response }: Context): Promise<void> {
+        const language = getLanguage(request)
 
-        const actual = ctx.query.actual !== "false"
+        const actual = request.query.actual !== "false"
 
         const disruptionList: (NsDisruption | NsMaintenance)[] = (await Promise.all([
             this.data.getDisruptions(language),
@@ -38,8 +38,9 @@ export class DisruptionsControllerLegacy {
                 endDate: it.endDate ?? null
             }))
 
-        ctx.response.status = 200
-        ctx.response.body = disruptions
+        response.status = 200
+        response.body = disruptions
+        setCacheTime(response, 60 * 2)
     }
 }
 
