@@ -3,7 +3,7 @@ import { Context } from "koa"
 import { searchStation, searchStations } from "../searchStations"
 import { transformNsDeparture } from "../data-access/transformations/departure"
 import { DataRepository } from "../data-access/Repositories"
-import { setCacheTime, getLanguage, sleep } from "./Utils"
+import { setCacheExpirationTime, getLanguage, sleep } from "./Utils"
 
 @ApiController("/api/v0")
 export class StationsController {
@@ -16,7 +16,7 @@ export class StationsController {
         response.status = 200
         const hasQueryString = q !== null && typeof q === "string"
         response.body = hasQueryString ? await searchStations(this.data, q, false) : await this.data.getStations()
-        setCacheTime(response, 60 * 60 * 24 * 5)
+        setCacheExpirationTime(response, 60 * 60 * 24 * 5)
     }
 
     @HttpGet
@@ -29,7 +29,7 @@ export class StationsController {
 
         response.status = station === null ? 404 : 200
         if (station !== null) response.body = station
-        setCacheTime(response, 90)
+        setCacheExpirationTime(response, 90)
     }
 
     @HttpGet
@@ -51,6 +51,6 @@ export class StationsController {
 
         response.status = 200
         response.body = await Promise.all(departures)
-        setCacheTime(response, 90)
+        setCacheExpirationTime(response, 90)
     }
 }

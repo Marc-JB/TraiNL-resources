@@ -4,7 +4,7 @@ import moment from "moment"
 import { NsDisruption } from "../models/ns/NsDisruption"
 import { NsMaintenance } from "../models/ns/NsMaintenance"
 import { DataRepository } from "../data-access/Repositories"
-import { setCacheTime, getLanguage } from "./Utils"
+import { setCacheExpirationTime, getLanguage } from "./Utils"
 
 @ApiController("/api/v1")
 export class DisruptionsControllerLegacy {
@@ -40,7 +40,7 @@ export class DisruptionsControllerLegacy {
 
         response.status = 200
         response.body = disruptions
-        setCacheTime(response, 60 * 2)
+        setCacheExpirationTime(response, 60 * 2)
     }
 }
 
