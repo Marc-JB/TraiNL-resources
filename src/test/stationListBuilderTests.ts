@@ -1,4 +1,4 @@
-import { getCountryInfo } from "../main/transformations/station"
+import { getCountryInfo } from "../main/data-access/transformations/station"
 import { suite, test, expect } from "@peregrine/test-with-decorators"
 
 @suite
