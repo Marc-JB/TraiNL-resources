@@ -21,42 +21,17 @@ export function transformNsStation(it: NsStation): Station {
 }
 
 export function getCountryInfo(code: string, language: "en" | "nl" | string = "en"): CountryInfo {
+    const from = (code: string, flag: string, name: string): CountryInfo => ({ code, flag, name })
+    const isDutch = language === "nl"
+
     switch (code) {
-        case "NL": return {
-            flag: "🇳🇱",
-            name: language === "nl" ? "Nederland" : "The Netherlands",
-            code: "NL"
-        }
-        case "D": return {
-            flag: "🇩🇪",
-            name: language === "nl" ? "Duitsland" : "Germany",
-            code: "DE"
-        }
-        case "GB": return {
-            flag: "🇬🇧",
-            name: language === "nl" ? "Verenigd Koninkrijk" : "United Kingdom",
-            code: "UK"
-        }
-        case "CH": return {
-            flag: "🇨🇭",
-            name: language === "nl" ? "Zwitserland" : "Switzerland",
-            code: "CH"
-        }
-        case "A": return {
-            flag: "🇦🇹",
-            name: language === "nl" ? "Oostenrijk" : "Austria",
-            code: "AT"
-        }
-        case "B": return {
-            flag: "🇧🇪",
-            name: language === "nl" ? "België" : "Belgium",
-            code: "BE"
-        }
-        case "F": return {
-            flag: "🇫🇷",
-            name: language === "nl" ? "Frankrijk" : "France",
-            code: "FR"
-        }
+        case "NL": return from("NL", "🇳🇱", isDutch ? "Nederland" : "The Netherlands")
+        case "D": return from("DE", "🇩🇪", isDutch ? "Duitsland" : "Germany")
+        case "GB": return from("UK", "🇬🇧", isDutch ? "Verenigd Koninkrijk" : "United Kingdom")
+        case "CH": return from("CH", "🇨🇭", isDutch ? "Zwitserland" : "Switzerland")
+        case "A": return from("AT", "🇦🇹", isDutch ? "Oostenrijk" : "Austria")
+        case "B": return from("BE", "🇧🇪", isDutch ? "België" : "Belgium")
+        case "F": return from("FR", "🇫🇷", isDutch ? "Frankrijk" : "France")
         default: throw new Error(`Unexpected switch statement falltrough (with country code: "${code}")`)
     }
 }
