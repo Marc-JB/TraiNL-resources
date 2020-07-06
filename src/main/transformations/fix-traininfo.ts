@@ -1,7 +1,7 @@
 import { searchStation } from "../searchStations"
 import { NsTrainFacility, NsTrainInfo, NsTrainPart } from "../models/ns/NsTrainInfo"
-import { ApiCacheManager } from "../data-access/ApiCacheManager"
 import { NsDeparture } from "../models/ns/NsDeparture"
+import { DataRepository } from "../data-access/Repositories"
 
 const qbuzzFacilities: NsTrainFacility[] = ["FIETS"]
 
@@ -36,7 +36,7 @@ const qbuzz3 = {
 }
 
 export async function fixNsTrainInfo(
-    data: ApiCacheManager,
+    data: DataRepository,
     it: Partial<NsTrainInfo>,
     departure: NsDeparture | null = null,
     language: "en" | "nl" = "en"

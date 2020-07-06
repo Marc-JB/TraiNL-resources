@@ -1,8 +1,8 @@
 import { ApiController, HttpGet, Path } from "@peregrine/koa-with-decorators"
 import { Context } from "koa"
-import { ApiCacheManager } from "./data-access/ApiCacheManager"
-import { searchStation, searchStations } from "./searchStations"
-import { transformNsDeparture } from "./transformations/departure"
+import { searchStation, searchStations } from "../searchStations"
+import { transformNsDeparture } from "../transformations/departure"
+import { DataRepository } from "../data-access/Repositories"
 
 async function sleep(timeInMilliSeconds: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, timeInMilliSeconds))
@@ -13,8 +13,8 @@ function getLanguage(_: Context): "en" | "nl" {
 }
 
 @ApiController("/api/v0")
-export class StationsAPI {
-    public constructor(private readonly data: ApiCacheManager) { }
+export class StationsController {
+    public constructor(private readonly data: DataRepository) { }
 
     @HttpGet
     @Path("/stations.json")

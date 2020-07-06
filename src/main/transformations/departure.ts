@@ -4,10 +4,10 @@ import { searchStation } from "../searchStations"
 import { transformNsTrainInfo } from "./train-info"
 import { Departure } from "../models/Departure"
 import { NsDeparture } from "../models/ns/NsDeparture"
-import { ApiCacheManager } from "../data-access/ApiCacheManager"
+import { DataRepository } from "../data-access/Repositories"
 
 export async function transformNsDeparture(
-    data: ApiCacheManager,
+    data: DataRepository,
     departure: NsDeparture,
     language: "en" | "nl" = "en"
 ): Promise<Departure> {

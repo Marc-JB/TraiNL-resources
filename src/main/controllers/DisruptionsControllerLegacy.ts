@@ -1,13 +1,13 @@
 import { ApiController, HttpGet, Path } from "@peregrine/koa-with-decorators"
 import { Context } from "koa"
 import moment from "moment"
-import { ApiCacheManager } from "./data-access/ApiCacheManager"
-import { NsDisruption } from "./models/ns/NsDisruption"
-import { NsMaintenance } from "./models/ns/NsMaintenance"
+import { NsDisruption } from "../models/ns/NsDisruption"
+import { NsMaintenance } from "../models/ns/NsMaintenance"
+import { DataRepository } from "../data-access/Repositories"
 
 @ApiController("/api/v1")
-export class LegacyDisruptionsAPI {
-    public constructor(private readonly data: ApiCacheManager) {}
+export class DisruptionsControllerLegacy {
+    public constructor(private readonly data: DataRepository) {}
 
     @HttpGet
     @Path("/disruptions.json")
